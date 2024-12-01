@@ -50,20 +50,23 @@ bool SemanticSearcher::isActive() const
     SemanticParser paser;
     d->m_semantic = false;
     d->m_vector   = false;
+    d->m_fulltext = false;
 
-    if (config->value(GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC_ANALYSIS, false)) {
-        if (paser.connectToAnalyze(SemanticHelper::analyzeServiceName())) {
-            d->m_semantic  = paser.isAnalayzeSupported();
+    if (config->value(GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC_ANALYSIS, true)) {
+        if (paser.connectToQueryLang(SemanticHelper::querylangServiceName())) {
+            d->m_semantic  = paser.isQueryLangSupported();
         }
     }
 
-    if (config->value(GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC_VECTOR, true)) {
-        if (paser.connectToVector(SemanticHelper::vectorServiceName())) {
-            d->m_vector = paser.isVectorSupported();
-        }
-    }
+//    if (config->value(GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC_VECTOR, true)) {
+//        if (paser.connectToVector(SemanticHelper::vectorServiceName())) {
+//            d->m_vector = paser.isVectorSupported();
+//        }
+//    }
 
-    return d->m_semantic || d->m_vector;
+    d->m_fulltext = config->value(GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC_FULLTEXT, false);
+
+    return d->m_semantic;
 }
 
 bool SemanticSearcher::activate()
@@ -74,7 +77,7 @@ bool SemanticSearcher::activate()
 ProxyWorker *SemanticSearcher::createWorker() const
 {
     auto worker = new SemanticWorker(name());
-    worker->setEngineState(d->m_semantic, d->m_vector);
+    worker->setEngineState(d->m_semantic, d->m_vector, d->m_fulltext);
     return worker;
 }
 

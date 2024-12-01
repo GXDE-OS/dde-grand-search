@@ -24,6 +24,7 @@ find_package(Qt5 COMPONENTS
     Widgets
     Concurrent
     DBus
+    Network
 REQUIRED)
 
 set(DBUSSRC
@@ -41,6 +42,7 @@ set(Qt_LIBS
     Qt5::Widgets
     Qt5::DBus
     Qt5::Concurrent
+    Qt5::Network
 )
 
 # gio 打开功能需要依赖的库
@@ -103,6 +105,14 @@ set(GUISRC
     gui/exhibition/preview/generalwidget/detailitem.cpp
     gui/exhibition/preview/generalwidget/detailwidget.h
     gui/exhibition/preview/generalwidget/detailwidget.cpp
+    gui/exhibition/preview/generalwidget/transbutton.h
+    gui/exhibition/preview/generalwidget/transbutton.cpp
+    gui/exhibition/preview/generalwidget/linkbutton.h
+    gui/exhibition/preview/generalwidget/linkbutton.cpp
+    gui/exhibition/preview/generalwidget/omitbutton.h
+    gui/exhibition/preview/generalwidget/omitbutton.cpp
+    gui/exhibition/preview/generalwidget/aitoolbar.h
+    gui/exhibition/preview/generalwidget/aitoolbar.cpp
     gui/exhibition/preview/pluginproxy.h
     gui/exhibition/preview/pluginproxy.cpp
     gui/exhibition/preview/previewproxyinterface.h
@@ -125,6 +135,12 @@ set(GUISRC
     gui/searchconfig/checkboxwidget/checkboxitem.h
     gui/searchconfig/switchwidget/switchwidget.cpp
     gui/searchconfig/switchwidget/switchwidget.h
+    gui/searchconfig/llmwidget/llmwidget.cpp
+    gui/searchconfig/llmwidget/llmwidget.h
+    gui/searchconfig/llmwidget/modelmanagebutton.cpp
+    gui/searchconfig/llmwidget/modelmanagebutton.h
+    gui/searchconfig/llmwidget/downloader.h
+    gui/searchconfig/llmwidget/downloader.cpp
     gui/searchconfig/hyperlinklabel/hyperlinklabel.cpp
     gui/searchconfig/hyperlinklabel/hyperlinklabel.h
     gui/searchconfig/comboboxwidget/comboboxwidget.h
@@ -151,6 +167,8 @@ set(GUISRC
     gui/searchconfig/intelligentretrieval/detailcheckbox.h
     gui/searchconfig/intelligentretrieval/autoindexstatus.cpp
     gui/searchconfig/intelligentretrieval/autoindexstatus.h
+    gui/searchconfig/tipslabel.h
+    gui/searchconfig/tipslabel.cpp
     )
 
 # business

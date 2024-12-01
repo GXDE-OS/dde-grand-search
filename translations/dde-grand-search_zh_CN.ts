@@ -2,6 +2,86 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN">
 <context>
+    <name>GrandSearch::AiToolBar</name>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="46"/>
+        <source>Unable to use %1, please go to the App Store to update the UOS AI version first.</source>
+        <translation>无法使用%1，请先到应用商店更新UOS AI版本</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="47"/>
+        <source>Cancel</source>
+        <translation>取 消</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="48"/>
+        <source>Open App Stroe</source>
+        <translation>打开商店</translation>
+    </message>
+</context>
+<context>
+    <name>GrandSearch::AiToolBarInner</name>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="102"/>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="152"/>
+        <source>Summary</source>
+        <translation>文档总结</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="103"/>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="153"/>
+        <source>Translation</source>
+        <translation>文档翻译</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="104"/>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="154"/>
+        <source>Extension</source>
+        <translation>文档扩写</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="105"/>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="155"/>
+        <source>Add to knowledge base</source>
+        <translation>添加到知识库</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="116"/>
+        <source>Summarize document content with UOS AI</source>
+        <translation>用UOS AI总结文档内容</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="117"/>
+        <source>Translate document content with UOS AI</source>
+        <translation>用UOS AI翻译文档内容</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="118"/>
+        <source>Extend document content with UOS AI</source>
+        <translation>用UOS AI扩写文档内容</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="119"/>
+        <source>Add document to UOS AI knowledge base</source>
+        <translation>将文档添加到UOS AI知识库</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="390"/>
+        <source>DDE Grand Search</source>
+        <translation>全局搜索</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="393"/>
+        <source>Unable to use %1, please go to the App Store to update the UOS AI version first.</source>
+        <translation>无法使用%1，请先到应用商店更新UOS AI版本</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="394"/>
+        <source>Open App Stroe</source>
+        <translation>打开商店</translation>
+    </message>
+</context>
+<context>
     <name>GrandSearch::BestMatchWidget</name>
     <message>
         <location filename="../src/grand-search/gui/searchconfig/bestmatchwidget.cpp" line="23"/>
@@ -150,59 +230,152 @@
 <context>
     <name>GrandSearch::IntelligentRetrievalWidget</name>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="49"/>
-        <source>Smart Search</source>
-        <translation>智能检索</translation>
-    </message>
-    <message>
-        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="63"/>
-        <source>Enable AI Smart Search</source>
-        <translation>开启AI智能搜索</translation>
-    </message>
-    <message>
         <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="68"/>
-        <source>Intelligent semantic search</source>
-        <translation>智能语义搜索</translation>
-    </message>
-    <message>
-        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="70"/>
         <source>When turned on, you can try to search for local documents using natural language descriptions, such as &quot;last week&apos;s documents&quot;.</source>
         <translation>开启后您可以尝试使用自然语言描述搜索本地文件，例如搜索“上周的文档”。</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="78"/>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="141"/>
         <source>Intelligent full text search</source>
         <translation>智能全文检索</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="91"/>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="85"/>
         <source>Automatic index update</source>
         <translation>自动更新索引</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="132"/>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="55"/>
+        <source>AI Smart Search</source>
+        <translation>AI智能搜索</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="110"/>
+        <source>UOS AI LLM</source>
+        <translation>UOS AI大模型</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="110"/>
+        <source>After installing the UOS AI large model, you can use the AI intelligent search function without an internet connection.</source>
+        <translation>安装UOS AI大模型后，无需联网即可使用AI智能搜索功能</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="119"/>
+        <source>Full Text Search</source>
+        <translation>全文检索</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="127"/>
+        <source>When turned on, full text search can be used in the file manager and grand search.</source>
+        <translation>开启后，在系统文件管理器和全局搜索内均可使用全文检索功能</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="173"/>
         <source>When enabled, you can search the text of articles using disjointed and incomplete keywords.</source>
         <translation>开启后您可以使用不连贯、不完整的关键词搜索文章文本内容。</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="154"/>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="195"/>
         <source>Please install %0 in &lt;a href=&quot;%0&quot;&gt;the app store&lt;/a&gt; before turning on this configuration.</source>
         <translation>请先到 &lt;a href=&quot;%0&quot;&gt;应用商店&lt;/a&gt; 安装%0模型后再开启该配置。</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="192"/>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="234"/>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="358"/>
         <source>Intelligent search indexing is being updated, which may take up more resources, please keep the power access.</source>
         <translation>正在更新智能搜索索引编制，可能占用较多资源，请保持电源接入。</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="196"/>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="238"/>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="362"/>
         <source>Smart Search indexing update is complete. Last update time: %0</source>
         <translation>智能搜索索引编制更新完成。上次更新时间：%0</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="199"/>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="241"/>
         <source>Indexing error!</source>
         <translation>索引编制出错！</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="287"/>
+        <source>To use AI smart search, you need to install the UOS AI large model. Please install the model.</source>
+        <translation>使用AI智能搜索需要安装UOS AI大模型，请安装模型</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="288"/>
+        <source>Not yet</source>
+        <translation>暂不使用</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="289"/>
+        <source>Install the model</source>
+        <translation>安装模型</translation>
+    </message>
+</context>
+<context>
+    <name>GrandSearch::LLMWidget</name>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="59"/>
+        <source>NotInstalled</source>
+        <translation>未安装</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="74"/>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="342"/>
+        <source>Install Model</source>
+        <translation>安装模型</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="90"/>
+        <source>Update model</source>
+        <translation>更新模型</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="91"/>
+        <source>Uninstall model</source>
+        <translation>卸载模型</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="146"/>
+        <source>Installing</source>
+        <translation>安装中</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="211"/>
+        <source>Are you sure you want to delete this model?</source>
+        <translation>确定卸载UOS AI大模型？</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="212"/>
+        <source>After uninstallation, functions such as AI Search and UOS AI Assistant will not work properly.</source>
+        <translation>卸载后将导致AI搜索、UOS AI助手等功能无法正常使用。</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="213"/>
+        <source>Cancel</source>
+        <comment>button</comment>
+        <translation>暂不卸载</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="214"/>
+        <source>Confirm</source>
+        <comment>button</comment>
+        <translation>确定卸载</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="337"/>
+        <source>UnInstall Model</source>
+        <translation>卸载模型</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="338"/>
+        <source>Installed</source>
+        <translation>已安装</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="343"/>
+        <source>Not Installed</source>
+        <translation>未安装</translation>
     </message>
 </context>
 <context>
