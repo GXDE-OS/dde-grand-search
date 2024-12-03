@@ -1,6 +1,6 @@
-dde-grand-search (5.5.7) unstable; urgency=medium
+dde-grand-search (5.5.7-1) unstable; urgency=medium
 
-  * Disable auto index.
+  * fix: add dependency to fix -daemon crash
 
  -- Zhang Yu <zhangyub@uniontech.com>  Fri, 1 Nov 2024 15:20:14 +0800
 
