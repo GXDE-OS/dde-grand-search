@@ -1,7 +1,8 @@
-dde-grand-search (5.5.7-2) unstable; urgency=medium
+dde-grand-search (5.5.7-3) unstable; urgency=medium
 
   * fix: add dependency to fix -daemon crash
   * fix: change dock plugin svg args to fix dock experience
+  * fix: font is white now
 
  -- Zhang Yu <zhangyub@uniontech.com>  Fri, 1 Nov 2024 15:20:14 +0800
 
