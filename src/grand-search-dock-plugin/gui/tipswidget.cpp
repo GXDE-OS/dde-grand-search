@@ -69,7 +69,9 @@ void TipsWidget::paintEvent(QPaintEvent *event)
     QFrame::paintEvent(event);
 
     QPainter painter(this);
-    painter.setPen(QPen(palette().brightText(), 1));
+
+    // 设置文字颜色为白色
+    painter.setPen(QPen(Qt::white, 1));
 
     QTextOption option;
     option.setAlignment(Qt::AlignCenter);
@@ -79,7 +81,7 @@ void TipsWidget::paintEvent(QPaintEvent *event)
         painter.drawText(rect(), m_text, option);
         break;
     case MultiLine:
-        int y= 0;
+        int y = 0;
         if (m_textList.size() != 1)
             option.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
         for (QString text : m_textList) {
@@ -90,7 +92,6 @@ void TipsWidget::paintEvent(QPaintEvent *event)
         break;
     }
 }
-
 bool TipsWidget::event(QEvent *event)
 {
     if (event->type() == QEvent::FontChange) {
