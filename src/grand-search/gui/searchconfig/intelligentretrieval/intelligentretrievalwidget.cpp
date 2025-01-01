@@ -7,6 +7,7 @@
 #include "autoindexstatus.h"
 #include "gui/searchconfig/switchwidget/switchwidget.h"
 #include "gui/searchconfig/llmwidget/llmwidget.h"
+#include "gui/searchconfig/llmwidget/embeddingpluginwidget.h"
 #include "business/config/searchconfig.h"
 #include "global/searchconfigdefine.h"
 #include "global/builtinsearch.h"
@@ -14,6 +15,7 @@
 
 #include <DFontSizeManager>
 #include <DDialog>
+#include <DConfig>
 
 #include <QDBusConnection>
 #include <QDBusMessage>
@@ -24,6 +26,7 @@
 #include <QDateTime>
 
 DWIDGET_USE_NAMESPACE
+DCORE_USE_NAMESPACE
 
 using namespace GrandSearch;
 
@@ -103,6 +106,52 @@ IntelligentRetrievalWidget::IntelligentRetrievalWidget(QWidget *parent)
         m_indexLayout->addWidget(bkg);
     }
 
+    // full text
+    {
+        m_indexLayout->addSpacing(10);
+        m_fullTextIndex = new SwitchWidget(tr("Full Text Search"), m_indexWidget);
+        m_fullTextIndex->setEnableBackground(true);
+        m_fullTextIndex->setFixedSize(SWITCHWIDGETWIDTH, DETAILSWITCHWIDGETHEIGHT / 2);
+        m_fullTextIndex->setIconEnable(false);
+        m_indexLayout->addWidget(m_fullTextIndex);
+        if (turnOn) {
+            // 默认状态下读取文管接口作为默认值
+            DConfig *dcfg = DConfig::create("org.deepin.dde.file-manager", "org.deepin.dde.file-manager.search");
+            bool isFileManagerTrue = dcfg->value("enableFullTextSearch").toBool();
+            delete dcfg;
+
+            bool isTrue = SearchConfig::instance()->getConfig(GRANDSEARCH_SEMANTIC_GROUP, GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC_FULLTEXT, isFileManagerTrue).toBool();
+            SearchConfig::instance()->setConfig(GRANDSEARCH_SEMANTIC_GROUP, GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC_FULLTEXT, isTrue);
+            m_fullTextIndex->setChecked(isTrue);
+        }
+
+        m_indexLayout->addSpacing(5);
+        m_fullTextLabel = new TipsLabel(tr("When turned on, full text search can be used in the file manager and grand search.")
+                                   , this);
+        auto margin = m_fullTextLabel->contentsMargins();
+        margin.setLeft(10);
+        m_fullTextLabel->setContentsMargins(margin);
+        m_indexLayout->addWidget(m_fullTextLabel);
+    }
+
+    // plugin
+    {
+        RoundedBackground *bkg = new RoundedBackground(m_indexWidget);
+        bkg->setMinimumSize(CHECKBOXITEMWIDTH, SWITCHWIDGETHEIGHT);
+        bkg->setTopRound(true);
+        bkg->setBottomRound(true);
+
+        QVBoxLayout *vl = new QVBoxLayout(bkg);
+        bkg->setLayout(vl);
+        vl->setContentsMargins(0, 2, 0, 5);
+        m_embWidget = new EmbeddingPluginWidget(bkg);
+        m_embWidget->setText(tr("Embedding Plugins"),tr("After installing the model, you can use services such as AI Search and UOS AI Assistant.."));
+        m_embWidget->checkInstallStatus();
+        vl->addWidget(m_embWidget);
+        m_indexLayout->addSpacing(10);
+        m_indexLayout->addWidget(bkg);
+    }
+
     // model
     {
         RoundedBackground *bkg = new RoundedBackground(m_indexWidget);
@@ -119,28 +168,8 @@ IntelligentRetrievalWidget::IntelligentRetrievalWidget(QWidget *parent)
         vl->addWidget(m_llmWidget);
         m_indexLayout->addSpacing(10);
         m_indexLayout->addWidget(bkg);
+        connect(m_embWidget, &EmbeddingPluginWidget::pluginStateChanged, m_llmWidget, &LLMWidget::pluginStateChanged);
     }
-
-    // full text
-    if (0)
-    {
-        m_indexLayout->addSpacing(10);
-        m_fullTextIndex = new SwitchWidget(tr("Full Text Search"), m_indexWidget);
-        m_fullTextIndex->setEnableBackground(true);
-        m_fullTextIndex->setFixedSize(SWITCHWIDGETWIDTH, DETAILSWITCHWIDGETHEIGHT / 2);
-        m_fullTextIndex->setIconEnable(false);
-        m_fullTextIndex->setChecked(SearchConfig::instance()->getConfig(GRANDSEARCH_SEMANTIC_GROUP, GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC_FULLTEXT, false).toBool());
-        m_indexLayout->addWidget(m_fullTextIndex);
-
-        m_indexLayout->addSpacing(5);
-        m_fullTextLabel = new TipsLabel(tr("When turned on, full text search can be used in the file manager and grand search.")
-                                   , this);
-        auto margin = m_fullTextLabel->contentsMargins();
-        margin.setLeft(10);
-        m_fullTextLabel->setContentsMargins(margin);
-        m_indexLayout->addWidget(m_fullTextLabel);
-    }
-
 #ifdef VECTOR_SEARCH
     // 超链接
     m_vectorDetail = new QLabel;
@@ -156,7 +185,7 @@ IntelligentRetrievalWidget::IntelligentRetrievalWidget(QWidget *parent)
     updateState();
 
     connect(&m_timer, &QTimer::timeout, this, &IntelligentRetrievalWidget::updateState);
-    m_timer.start(10000);
+    m_timer.start(5000);
     connect(m_semantic, &SwitchWidget::checkedChanged, this, &IntelligentRetrievalWidget::checkChanged);
 #ifdef VECTOR_SEARCH
     connect(m_vector->checkBox(), &QCheckBox::stateChanged, this, &IntelligentRetrievalWidget::checkChanged);
@@ -173,6 +202,8 @@ void IntelligentRetrievalWidget::updateState()
     if (m_semantic->checked()) {
         this->updateIndexStatusContent(this->getIndexStatus());
     }
+
+    m_embWidget->checkInstallStatus();
 
 #ifdef VECTOR_SEARCH
     if (isVectorSupported()) {
@@ -282,32 +313,23 @@ void IntelligentRetrievalWidget::checkChanged()
         m_indexWidget->setVisible(on);
         adjustSize();
 
-        m_featIndex->setChecked(on);
+        //m_featIndex->setChecked(on);
         //m_fullTextIndex->setChecked(on);
         if (!on) {
             this->setAutoIndex(on);
+            this->setFulltextQuery(on);
         }
-        //setFulltextQuery(on);
 
         // 检测是否安装大模型，未安装就提醒弹窗
-        if (on && !this->isQueryLangSupported()) {
-            DDialog *warningDlg = new DDialog();
-            warningDlg->setWindowFlags((warningDlg->windowFlags() | Qt::WindowType::WindowStaysOnTopHint));
-            warningDlg->setFixedWidth(380);
-            warningDlg->setIcon(QIcon(":icons/dde-grand-search-setting.svg"));
-            warningDlg->setMessage(QString(tr("To use AI smart search, you need to install the UOS AI large model. Please install the model.")));
-            warningDlg->addButton(tr("Not yet"), false, DDialog::ButtonNormal);
-            warningDlg->addButton(tr("Install the model"), true, DDialog::ButtonRecommend);
-            connect(warningDlg, &DDialog::accepted, warningDlg, [&] {
-                m_llmWidget->onClickedStatusBtn();
-                //QDBusInterface iface("com.home.appstore.client", "/com/home/appstore/client", "com.home.appstore.client");
-                //iface.call("openBusinessUri", "");
-            });
-            connect(warningDlg, &DDialog::finished, warningDlg, [&] {
-                warningDlg->deleteLater();
-            });
-            warningDlg->moveToCenter();
-            warningDlg->exec();
+        if (on && (!m_llmWidget->isInstalled() || !m_embWidget->isInstalled())) {
+            DDialog warningDlg;
+            warningDlg.setWindowFlags((warningDlg.windowFlags() | Qt::WindowType::WindowStaysOnTopHint));
+            warningDlg.setFixedWidth(380);
+            warningDlg.setIcon(QIcon(":icons/dde-grand-search-setting.svg"));
+            warningDlg.setMessage(QString(tr("To use AI Smart Search, you need to install the Embedding Plugins and UOS AI LLM first.")));
+            warningDlg.addButton(tr("OK"), true, DDialog::ButtonNormal);
+            warningDlg.moveToCenter();
+            warningDlg.exec();
         }
     }
 #ifdef VECTOR_SEARCH
@@ -352,6 +374,12 @@ QVariantHash IntelligentRetrievalWidget::getIndexStatus()
     return QJsonDocument::fromJson(json.toUtf8()).object().toVariantHash();
 }
 
+bool IntelligentRetrievalWidget::isUpdateIndex()
+{
+    const QVariantHash &status = IntelligentRetrievalWidget::getIndexStatus();
+    return status.value("enable", false).toBool();
+}
+
 void IntelligentRetrievalWidget::updateIndexStatusContent(const QVariantHash &status)
 {
     if (!status.value("enable", false).toBool()) {
@@ -377,6 +405,16 @@ void IntelligentRetrievalWidget::updateIndexStatusContent(const QVariantHash &st
 void IntelligentRetrievalWidget::setFulltextQuery(bool on)
 {
     SearchConfig::instance()->setConfig(GRANDSEARCH_SEMANTIC_GROUP, GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC_FULLTEXT, on);
+    // 调用文管接口，没开就打开
+    if (on) {
+        DConfig *dcfg = DConfig::create("org.deepin.dde.file-manager", "org.deepin.dde.file-manager.search");
+        bool isTrue = dcfg->value("enableFullTextSearch").toBool();
+        if (!isTrue) {
+            qDebug() << "DCONFIG enableFullTextSearch(false => true)";
+            dcfg->setValue("enableFullTextSearch", true);
+        }
+        delete dcfg;
+    }
 }
 
 #ifdef VECTOR_SEARCH
@@ -417,7 +455,7 @@ bool IntelligentRetrievalWidget::getIndexStatus(QVariantHash &statuts)
 }
 #endif
 
-void IntelligentRetrievalWidget::onCloseEvent()
+bool IntelligentRetrievalWidget::onCloseEvent()
 {
-    m_llmWidget->onCloseEvent();
+    return m_llmWidget->onCloseEvent();
 }

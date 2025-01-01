@@ -25,16 +25,23 @@ IndexWidget::IndexWidget(QWidget *parent)
     m_groupLabel = new QLabel(tr("Index"));
     DFontSizeManager::instance()->bind(m_groupLabel, DFontSizeManager::T5, QFont::Bold);
 
-    m_intelligent = new IntelligentRetrievalWidget(this);
     m_mainLayout->addWidget(m_groupLabel);
+
+#ifdef ENABLE_AI_SEARCH
+    m_intelligent = new IntelligentRetrievalWidget(this);
     m_mainLayout->addWidget(m_intelligent);
     m_mainLayout->addSpacing(10);
+#endif
     m_mainLayout->addWidget(m_blackListWidget);
 }
 
-void IndexWidget::onCloseEvent()
+bool IndexWidget::onCloseEvent()
 {
-    m_intelligent->onCloseEvent();
+#ifdef ENABLE_AI_SEARCH
+    return m_intelligent->onCloseEvent();
+#else
+    return true;
+#endif
 }
 
 IndexWidget::~IndexWidget()
