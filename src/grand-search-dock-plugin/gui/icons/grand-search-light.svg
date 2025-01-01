@@ -1,7 +1,61 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <title>global-search-light</title>
-    <g id="global-search-light" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <path d="M11,1.4 C16.3019336,1.4 20.6,5.6980664 20.6,11 C20.6,13.1141415 19.9166036,15.0686673 18.7586679,16.6547202 L22.9788852,20.8739685 C23.5646716,21.459755 23.5646716,22.4095024 22.9788852,22.9952889 C22.3930987,23.5810753 21.4433513,23.5810753 20.8575648,22.9952889 L16.6355406,18.7726343 C15.0529225,19.9220968 13.1056276,20.6 11,20.6 C5.6980664,20.6 1.4,16.3019336 1.4,11 C1.4,5.6980664 5.6980664,1.4 11,1.4 Z M11,2.6 C6.3608081,2.6 2.6,6.3608081 2.6,11 C2.6,15.6391919 6.3608081,19.4 11,19.4 C15.6391919,19.4 19.4,15.6391919 19.4,11 C19.4,6.3608081 15.6391919,2.6 11,2.6 Z" id="形状" fill="#FFFFFF" fill-rule="nonzero"></path>
-    </g>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="256"
+   height="256.19073"
+   viewBox="0 0 256 256.19073"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="grand-search-light.svg"
+   inkscape:version="1.4 (e7c3feb, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="31.625"
+     inkscape:cx="10.624506"
+     inkscape:cy="10.608696"
+     inkscape:window-width="1920"
+     inkscape:window-height="985"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <title
+     id="title1">global-search-light</title>
+  <g
+     id="global-search-light"
+     stroke="none"
+     stroke-width="1"
+     fill="none"
+     fill-rule="evenodd"
+     transform="matrix(11.626732,0,0,11.626732,-16.277425,-16.277425)">
+    <path
+       d="m 11,1.4 c 5.301934,0 9.6,4.2980664 9.6,9.6 0,2.114142 -0.683396,4.068667 -1.841332,5.65472 l 4.220217,4.219248 c 0.585787,0.585787 0.585787,1.535534 0,2.121321 -0.585786,0.585786 -1.535534,0.585786 -2.12132,0 L 16.635541,18.772634 C 15.052922,19.922097 13.105628,20.6 11,20.6 5.6980664,20.6 1.4,16.301934 1.4,11 1.4,5.6980664 5.6980664,1.4 11,1.4 Z m 0,1.2 c -4.6391919,0 -8.4,3.7608081 -8.4,8.4 0,4.639192 3.7608081,8.4 8.4,8.4 4.639192,0 8.4,-3.760808 8.4,-8.4 0,-4.6391919 -3.760808,-8.4 -8.4,-8.4 z"
+       id="形状"
+       fill="#ffffff"
+       fill-rule="nonzero" />
+  </g>
+  <metadata
+     id="metadata1">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>global-search-light</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
 </svg>

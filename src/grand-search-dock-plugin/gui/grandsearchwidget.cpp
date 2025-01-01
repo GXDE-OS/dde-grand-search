@@ -74,20 +74,20 @@ void GrandSearchWidget::paintEvent(QPaintEvent *event)
     if (rect().height() > PLUGIN_BACKGROUND_MIN_SIZE) {
 
         QColor color;
-        if (DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType) {
-            color = Qt::black;
-            painter.setOpacity(0.5);
+//        if (DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::LightType) {
+//            color = Qt::black;
+//            painter.setOpacity(0.5);
 
-            if (m_hover) {
-                painter.setOpacity(0.6);
-            }
+//            if (m_hover) {
+//                painter.setOpacity(0.6);
+//            }
 
-            if (m_pressed) {
-                painter.setOpacity(0.3);
-            }
-        } else {
+//            if (m_pressed) {
+//                painter.setOpacity(0.3);
+//            }
+//        } else {
             color = Qt::white;
-            painter.setOpacity(0.1);
+            painter.setOpacity(0.0);
 
             if (m_hover) {
                 painter.setOpacity(0.2);
@@ -96,7 +96,7 @@ void GrandSearchWidget::paintEvent(QPaintEvent *event)
             if (m_pressed) {
                 painter.setOpacity(0.05);
             }
-        }
+//        }
 
         painter.setRenderHint(QPainter::Antialiasing, true);
 
@@ -161,9 +161,12 @@ const QPixmap GrandSearchWidget::loadSvg(const QString &fileName, const QSize &s
 {
     const auto ratio = devicePixelRatioF();
 
-    // 高分辨率下不缩放
-    auto pixmapSize = QCoreApplication::testAttribute(Qt::AA_UseHighDpiPixmaps) ? size : (size * ratio);
+    // 处理高分辨率屏幕缩放
+    auto pixmapSize = size * ratio;
     QPixmap pixmap = QIcon::fromTheme(fileName, QIcon(QString(":/icons/%1.svg").arg(fileName))).pixmap(pixmapSize);
+
+    // 设置设备像素比率，以便在高分屏下正确显示
+    pixmap.setDevicePixelRatio(ratio);
 
     return pixmap;
 }
