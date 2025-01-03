@@ -819,11 +819,12 @@ bool Utils::openFile(const MatchedItem &item)
 
 bool Utils::launchApp(const QString& desktopFile, const QStringList &filePaths)
 {
-    bool ok = launchAppByDBus(desktopFile, filePaths);
-    if (!ok) {
-        ok = launchAppByGio(desktopFile, filePaths);
-    }
-
+    // bool ok = launchAppByDBus(desktopFile, filePaths);
+    // if (!ok) {
+    //     ok = launchAppByGio(desktopFile, filePaths);
+    // }
+    bool ok = launchAppByGio(desktopFile, filePaths);
+     
     return ok;
 }
 
@@ -879,13 +880,12 @@ bool Utils::launchAppByDBus(const QString &desktopFile, const QStringList &fileP
 
 bool Utils::launchAppByGio(const QString &desktopFile, const QStringList &filePaths)
 {
-    // 使用gio接口启动应用
     std::string stdDesktopFilePath = desktopFile.toStdString();
     const char *cDesktopPath = stdDesktopFilePath.data();
 
     GDesktopAppInfo *appInfo = g_desktop_app_info_new_from_filename(cDesktopPath);
     if (!appInfo) {
-        //qDebug() << "Failed to open desktop file with gio: g_desktop_app_info_new_from_filename returns NULL. Check PATH maybe?";
+        qWarning() << "Failed to open desktop file with gio: g_desktop_app_info_new_from_filename returns NULL.";
         return false;
     }
 
@@ -906,16 +906,14 @@ bool Utils::launchAppByGio(const QString &desktopFile, const QStringList &filePa
     }
 
     if (!ok) {
-        qWarning() << "Failed to open desktop file with gio: g_app_info_launch returns false";
+        qWarning() << "Failed to open desktop file with gio: g_app_info_launch returns false.";
     }
+
+    // Cleanup
     g_object_unref(appInfo);
     g_list_free(g_files);
 
-    for (auto filePath : filePaths) {
-        if (!filePath.isEmpty())
-            QProcess::startDetached("gio", QStringList() << "open" << filePath);
-    }
-
+    // Remove QProcess-based fallback to avoid duplicate openings
     return ok;
 }
 
