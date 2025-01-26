@@ -1,4 +1,24 @@
-dde-grand-search (5.5.11-1) unstable; urgency=medium
+dde-grand-search (5.5.14) unstable; urgency=medium
+
+  * update version
+
+ -- Liu zheng <liuzheng@uniontech.com>  Fri, 17 Jan 2025 21:36:12 +0800
+
+dde-grand-search (5.5.13) unstable; urgency=medium
+
+  * update dde-grand-search V25 5.5.13 baseline version
+  * fix issue about launch app and CI build.
+
+ -- re2zero <yangwu@uniontech.com>  Fri, 17 Jan 2025 14:45:45 +0800
+
+dde-grand-search (5.5.12) unstable; urgency=medium
+
+  * update dde-grand-search V25 5.5.12 baseline version
+  * fix issue about launch app and CI build.
+
+ -- re2zero <yangwu@uniontech.com>  Fri, 17 Jan 2025 14:15:36 +0800
+
+dde-grand-search (5.5.11) unstable; urgency=medium
 
   * fix: Open everything twice
 

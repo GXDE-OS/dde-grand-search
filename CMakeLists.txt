@@ -22,18 +22,21 @@ if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "mips")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -z noexecstack -z relro")
 endif()
 
-#Indentify the version
-find_package(DtkCMake REQUIRED)
-
-if (1 OR ${DEEPIN_OS_VERSION} MATCHES "^(23|25)$")
-    add_definitions(-DCOMPILE_ON_V23)
-    set(COMPLIE_ON_V23 TRUE)
-    message("COMPILE ON v2x")
-else()
-    add_definitions(-DCOMPILE_ON_V20)
-    set(COMPLIE_ON_V20 TRUE)
-    message("COMPILE ON v20")
+# Find Qt version
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+if (NOT DEFINED QT_VERSION_MAJOR)
+    set(QT_VERSION_MAJOR 6)
 endif()
+if (QT_VERSION_MAJOR MATCHES 6)
+    set(DTK_VERSION_MAJOR 6)
+else()
+    set(DTK_VERSION_MAJOR "")
+endif()
+message("   >>> Found Qt version: ${QT_VERSION_MAJOR}")
+message("   >>> Build with DTK: ${DTK_VERSION_MAJOR}")
+
+set(QT_NS Qt${QT_VERSION_MAJOR})
+set(DTK_NS Dtk${DTK_VERSION_MAJOR})
 
 #tar -czvf antlr4.tar.gz ./antlr4
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/antlr4")

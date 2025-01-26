@@ -19,6 +19,7 @@
 #include <string.h>
 #include <sys/param.h>
 #include <assert.h>
+#include <stdlib.h>
 #include "array.h"
 #include "btree.h"
 
