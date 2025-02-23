@@ -238,7 +238,7 @@ void GroupWidget::showLabel(bool bShow)
 {
     m_listView->setVisible(!bShow);
     m_resultLabel->setVisible(bShow);
-    if (bShow && m_searchGroupName == GRANDSEARCH_GROUP_FILE_INFERENCE) {
+    /*if (bShow && m_searchGroupName == GRANDSEARCH_GROUP_FILE_INFERENCE) {
         // 有无索引文件
         QString idxDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/.cache/deepin/deepin-ai-daemon/index";
         bool hasIdx = QFile::exists(idxDir);
@@ -265,7 +265,7 @@ void GroupWidget::showLabel(bool bShow)
         } else {
             m_resultLabel->setText(tr("No search results"));
         }
-    }
+    }*/
 }
 
 QString GroupWidget::convertDisplayName(const QString &searchGroupName)

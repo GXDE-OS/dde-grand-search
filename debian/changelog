@@ -1,3 +1,9 @@
+dde-grand-search (5.5.12) UNRELEASED; urgency=medium
+
+  * 禁用AI大模型
+
+ -- gfdgd_xi <3025613752@qq.com>  Sun, 23 Feb 2025 11:21:50 +0800
+
 dde-grand-search (5.5.11-1) unstable; urgency=medium
 
   * fix: Open everything twice
