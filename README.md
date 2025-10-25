@@ -31,7 +31,7 @@ _The **master** branch is current development branch, build dependencies may cha
  * libdframeworkdbus-dev
  * qttools5-dev-tools
  * cmake
- * dde-dock-dev
+ * gxde-dock-dev
  * libglib2.0-dev
  * libpoppler-qt5-dev
  * libtag1-dev

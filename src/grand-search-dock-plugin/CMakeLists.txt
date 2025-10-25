@@ -40,7 +40,7 @@ find_package(DtkWidget REQUIRED)
 find_package(PkgConfig REQUIRED)
 
 # 加载需要的库
-pkg_check_modules(DdeDockInterface REQUIRED dde-dock)
+pkg_check_modules(DdeDockInterface REQUIRED gxde-dock)
 pkg_check_modules(QGSettings REQUIRED gsettings-qt)
 
 # 编译目标
@@ -74,8 +74,8 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE
 set(CMAKE_INSTALL_PREFIX "/usr")
 
 # 设置执行 make install 时哪个目标应该被 install 到哪个位置
-# 插件.so在/usr/lib/dde-dock/plugins/下则显示在插件区域,在/usr/lib/dde-dock/plugins/system-tray/目录则显示在托盘区域
-install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION lib/dde-dock/plugins/)
+# 插件.so在/usr/lib/gxde-dock/plugins/下则显示在插件区域,在/usr/lib/gxde-dock/plugins/system-tray/目录则显示在托盘区域
+install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION lib/gxde-dock/plugins/)
 
 # gsettings
 install(FILES gschema/com.deepin.dde.dock.module.grand-search.gschema.xml DESTINATION ${CMAKE_INSTALL_DATADIR}/glib-2.0/schemas)

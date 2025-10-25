@@ -35,7 +35,7 @@ set(Qt_LIBS
     Qt5::Concurrent
 )
 
-pkg_check_modules(DdeDockInterface REQUIRED dde-dock)
+pkg_check_modules(DdeDockInterface REQUIRED gxde-dock)
 pkg_check_modules(QGSettings REQUIRED gsettings-qt)
 
 set(PROJECT_SRC_PATH "${PROJECT_SOURCE_PATH}/grand-search-dock-plugin")

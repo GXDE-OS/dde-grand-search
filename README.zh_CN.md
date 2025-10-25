@@ -31,7 +31,7 @@ _当前的开发分支为**master**，编译依赖可能会在没有更新本说
  * libdframeworkdbus-dev
  * qttools5-dev-tools
  * cmake
- * dde-dock-dev
+ * gxde-dock-dev
  * libglib2.0-dev
  * libpoppler-qt5-dev
  * libtag1-dev

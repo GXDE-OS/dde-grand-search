@@ -1,8 +1,9 @@
-dde-grand-search (5.5.14) UNRELEASED; urgency=medium
+dde-grand-search (5.5.15) UNRELEASED; urgency=medium
 
   * 修复 Debian13 构建错误
+  * 调整使用 dde-dock 为 gxde-dock
 
- -- gfdgd_xi <3025613752@qq.com>  Sun, 16 Mar 2025 14:57:42 +0800
+ -- gfdgd_xi <3025613752@qq.com>  Sat, 25 Oct 2025 22:13:48 +0800
 
 dde-grand-search (5.5.11-1) unstable; urgency=medium
 

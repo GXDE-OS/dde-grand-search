@@ -23,7 +23,7 @@ BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  dtkwidget-devel >= 5.1
 BuildRequires:  dtkgui-devel >= 5.2.2.16
 BuildRequires:  pkgconfig(taglib)
-BuildRequires:  dde-dock-devel
+BuildRequires:  gxde-dock-devel
 BuildRequires:  pkgconfig(poppler-qt5)
 BuildRequires:  ffmpeg-devel
 BuildRequires:  ffmpegthumbnailer-devel
@@ -64,7 +64,7 @@ sed -i 's|lib/|%{_lib}/|' src/grand-search-dock-plugin/CMakeLists.txt
 %{_bindir}/%{name}
 %{_bindir}/%{name}-daemon
 %{_libdir}/dde-grand-search-daemon/lib%{name}-daemon.so
-%{_libdir}/dde-dock/plugins/libddegrandsearch_dockplugin.so
+%{_libdir}/gxde-dock/plugins/libddegrandsearch_dockplugin.so
 %{_libdir}/dde-grand-search-daemon/plugins/searcher/.readme
 %{_libdir}/dde-grand-search/plugins/preview
 %{_datadir}/dbus-1/interfaces/com.deepin.dde.GrandSearch.xml
