@@ -1,14 +1,15 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "imagepreview_global.h"
 #include "imageview.h"
 #include "global/commontools.h"
+#include "global/widgets/highlightlabel.h"
 
-#include <DLabel>
 #include <DFontSizeManager>
 #include <DGuiApplicationHelper>
+#include <DWidget>
 
 #include <QDebug>
 #include <QtConcurrent>
@@ -18,13 +19,16 @@
 #include <QImageReader>
 #include <QBitmap>
 #include <QPainterPath>
-#include <QFontMetrics>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(logImagePreview)
 
 #define IMAGEWIDTH      310
 #define IMAGEHEIGHT     110
 #define ROUNDRADIUS     8
 
 DWIDGET_USE_NAMESPACE
+DGUI_USE_NAMESPACE
 GRANDSEARCH_USE_NAMESPACE
 using namespace GrandSearch::image_preview;
 
@@ -54,7 +58,7 @@ bool ImageView::stopPreview()
     return true;
 }
 
-void ImageView::loadImage(const QString &file, const QString &type)
+void ImageView::loadImage(const QString &file, const QString &type, const QStringList &keywords)
 {
     m_imageFile = file;
     m_formats = type.toLocal8Bit();
@@ -62,20 +66,23 @@ void ImageView::loadImage(const QString &file, const QString &type)
     // 名称超长时省略中间部分,并增加提示
     QFileInfo fileInfo(m_imageFile);
     QString name = fileInfo.fileName();
-    m_titleLabel->setElideMode(Qt::ElideMiddle);
-    m_titleLabel->setText(name);
 
-    QFontMetrics fontMetrics(m_titleLabel->font());
-    int textWidth = fontMetrics.size(Qt::TextSingleLine, name).width();
-    if (textWidth >= m_titleLabel->width())
+    // HighlightLabel 内部处理省略和高亮
+    m_titleLabel->setPlainText(name);
+    m_titleLabel->setKeywords(keywords);
+    if (m_titleLabel->isElided())
         m_titleLabel->setToolTip(name);
+    else
+        m_titleLabel->setToolTip("");
 
     if (!fileInfo.isReadable() || !canPreview()) {
+        qCWarning(logImagePreview) << "Cannot preview image - File not readable or unsupported format:" << m_imageFile;
         showErrorPage();
         return;
     }
 
     if (m_formats == QByteArrayLiteral("gif")) {
+        qCDebug(logImagePreview) << "Loading GIF animation:" << m_imageFile;
         m_isMovie = true;
         m_movie = new QMovie(this);
         m_movie->setFileName(m_imageFile);
@@ -86,9 +93,11 @@ void ImageView::loadImage(const QString &file, const QString &type)
         m_sourceSize = m_movie->frameRect().size();
         m_movie->stop();
     } else {
+        qCDebug(logImagePreview) << "Loading static image:" << m_imageFile;
         m_isMovie = false;
         bool success = m_image.load(m_imageFile, m_formats);
         if (!success) {
+            qCWarning(logImagePreview) << "Failed to load image:" << m_imageFile;
             showErrorPage();
             return;
         }
@@ -118,6 +127,21 @@ void ImageView::loadImage(const QString &file, const QString &type)
 
 }
 
+void ImageView::setMatchedContext(const QString &context, const QStringList &keywords)
+{
+    m_contentLabel->setVisible(!context.isEmpty());
+    m_titleLabel->setVisible(context.isEmpty());
+    if (!context.isEmpty()) {
+        // HighlightLabel 内部处理省略和高亮
+        m_contentLabel->setPlainText(context);
+        m_contentLabel->setKeywords(keywords);
+        if (m_contentLabel->isElided())
+            m_contentLabel->setToolTip(context);
+        else
+            m_contentLabel->setToolTip("");
+    }
+}
+
 void ImageView::initUI()
 {
     setFixedHeight(150);
@@ -126,27 +150,37 @@ void ImageView::initUI()
     m_imageLabel->setFixedSize(IMAGEWIDTH, IMAGEHEIGHT);
     m_imageLabel->setAlignment(Qt::AlignCenter);
 
-    m_titleLabel = new DLabel(this);
+    // 名称标签：中间省略，1行
+    m_titleLabel = new HighlightLabel(this);
     m_titleLabel->setFixedWidth(IMAGEWIDTH);
     m_titleLabel->setAlignment(Qt::AlignCenter);
+    m_titleLabel->setElideMode(HighlightLabel::ElideMode::Middle);
+    m_titleLabel->setMaxLines(1);
 
-    QFont titleFont = m_titleLabel->font();
-    titleFont.setWeight(QFont::Medium);
-    titleFont = DFontSizeManager::instance()->get(DFontSizeManager::T5, titleFont);
-    m_titleLabel->setFont(titleFont);
+    // 内容标签：右省略，1行
+    m_contentLabel = new HighlightLabel(this);
+    m_contentLabel->setFixedWidth(IMAGEWIDTH);
+    m_contentLabel->setAlignment(Qt::AlignCenter);
+    m_contentLabel->setElideMode(HighlightLabel::ElideMode::Smart);
+    m_contentLabel->setMaxLines(1);
+    m_contentLabel->setVisible(false);
 
-    QColor textColor(0, 0, 0, int(255 * 0.9));
-    if (DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::DarkType)
-        textColor = QColor(255, 255, 255, int(255 * 0.9));
-    QPalette pa = m_titleLabel->palette();
+    QPalette pa = palette();
+    auto textColor = pa.brightText().color();
+    textColor.setAlpha(255 * 0.9);
     pa.setColor(QPalette::WindowText, textColor);
+    QFont font = DFontSizeManager::instance()->get(DFontSizeManager::T7, QFont::Normal);
+    m_titleLabel->setFont(font);
     m_titleLabel->setPalette(pa);
+    m_contentLabel->setPalette(pa);
+    m_contentLabel->setFont(font);
 
     QHBoxLayout *imageLayout = new QHBoxLayout;
     imageLayout->addWidget(m_imageLabel);
 
     QHBoxLayout *titleLayout = new QHBoxLayout;
     titleLayout->addWidget(m_titleLabel);
+    titleLayout->addWidget(m_contentLabel);
 
     m_mainLayout = new QVBoxLayout(this);
     m_mainLayout->setContentsMargins(35, 12, 35, 0);
@@ -227,4 +261,3 @@ void ImageView::showErrorPage()
     auto errorPixmap = getRoundPixmap(QPixmap::fromImage(errorImg));
     m_imageLabel->setPixmap(errorPixmap);
 }
-

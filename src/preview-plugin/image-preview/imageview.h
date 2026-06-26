@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -11,9 +11,7 @@
 #include <QMovie>
 #include <QVBoxLayout>
 
-DWIDGET_BEGIN_NAMESPACE
-class DLabel;
-DWIDGET_END_NAMESPACE
+class HighlightLabel;
 
 namespace GrandSearch {
 namespace image_preview {
@@ -28,7 +26,8 @@ public:
     QSize sourceSize();
     bool stopPreview();
 
-    void loadImage(const QString &file, const QString &type);
+    void loadImage(const QString &file, const QString &type, const QStringList &keywords = QStringList());
+    void setMatchedContext(const QString &context, const QStringList &keywords = QStringList());
 private:
     void initUI();
     void initConnect();
@@ -52,7 +51,8 @@ private:
 
     QSize m_sourceSize;                 // 资源尺寸
     QLabel *m_imageLabel;               // 显示图片
-    Dtk::Widget::DLabel *m_titleLabel;  // 显示名称
+    HighlightLabel *m_titleLabel;       // 显示名称
+    HighlightLabel *m_contentLabel;     // 显示匹配内容
 };
 
 }}

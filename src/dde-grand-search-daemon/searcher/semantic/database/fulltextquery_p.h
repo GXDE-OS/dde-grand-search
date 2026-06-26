@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -37,7 +37,7 @@ public:
 public:
     QList<SemanticEntity> m_entity;
     FileResultsHandler *m_handler = nullptr;
-    QTime m_time;
+    QElapsedTimer m_time;
     int m_lastPush = 0;
     MatchedItemMap m_results;
     int m_count = 0;

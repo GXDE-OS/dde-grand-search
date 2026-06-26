@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -7,11 +7,12 @@
 
 // 定义内置搜索项的名称
 #define GRANDSEARCH_CLASS_FILE_DEEPIN "com.deepin.dde-grand-search.file-deepin"
-#define GRANDSEARCH_CLASS_FILE_FSEARCH "com.deepin.dde-grand-search.file-fsearch"
 #define GRANDSEARCH_CLASS_APP_DESKTOP "com.deepin.dde-grand-search.app-desktop"
 #define GRANDSEARCH_CLASS_SETTING_CONTROLCENTER "com.deepin.dde-grand-search.dde-control-center-setting"
 #define GRANDSEARCH_CLASS_WEB_STATICTEXT "com.deepin.dde-grand-search.web-statictext"
 #define GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC "com.deepin.dde-grand-search.generalfile-semantic"
+#define GRANDSEARCH_CLASS_OCR_TEXT "com.deepin.dde-grand-search.ocr-text"
+#define GRANDSEARCH_CLASS_FILE_FULLTEXT "com.deepin.dde-grand-search.file-fulltext"
 
 // AI搜索子项
 #define GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC_ANALYSIS GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC".analysis"
@@ -33,6 +34,7 @@
 #define GRANDSEARCH_GROUP_FILE_DOCUMNET      "com.deepin.dde-grand-search.group.files.document"
 
 #define GRANDSEARCH_GROUP_FILE_INFERENCE    "com.deepin.dde-grand-search.group.files.inference"
+#define GRANDSEARCH_GROUP_FILE_OCR           "com.deepin.dde-grand-search.group.files.ocr"
 
 /****************** 扩展数据 *********************************/
 // 搜索项在组内的显示等级
@@ -53,18 +55,25 @@
 // 拖尾数据
 #define GRANDSEARCH_PROPERTY_ITEM_TAILER    "itemTailer"
 
+// 修改时间（独立于拖尾，不限制绘制宽度）
+#define GRANDSEARCH_PROPERTY_ITEM_MODIFIED_TIME    "itemModifiedTime"
+
 // 匹配的到具体信息
 #define GRANDSEARCH_PROPERTY_ITEM_MATCHEDCONTEXT    "itemMatchedContext"
+
+// 匹配的关键词列表
+#define GRANDSEARCH_PROPERTY_ITEM_KEYWORDS          "itemKeywords"
 
 /****************** 扩展数据 END ******************************/
 
 #define DEF_BUILTISEARCH_NAMES  \
 static const QStringList predefBuiltinSearches { \
 GRANDSEARCH_CLASS_FILE_DEEPIN, \
-GRANDSEARCH_CLASS_FILE_FSEARCH, \
 GRANDSEARCH_CLASS_APP_DESKTOP, \
 GRANDSEARCH_CLASS_WEB_STATICTEXT, \
-GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC \
+GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC, \
+GRANDSEARCH_CLASS_FILE_FULLTEXT, \
+GRANDSEARCH_CLASS_OCR_TEXT \
 }
 
 #endif // BUILTINSEARCH_H

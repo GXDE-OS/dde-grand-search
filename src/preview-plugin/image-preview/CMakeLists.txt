@@ -11,18 +11,17 @@ set(SRCS
     imagepreviewplugin.cpp
     imageview.h
     imageview.cpp
+    ${CMAKE_SOURCE_DIR}/src/global/widgets/highlightlabel.h
+    ${CMAKE_SOURCE_DIR}/src/global/widgets/highlightlabel.cpp
+    ${CMAKE_SOURCE_DIR}/src/global/widgets/highlightutils.h
+    ${CMAKE_SOURCE_DIR}/src/global/widgets/highlightutils.cpp
 )
 
 add_library(${LIB_NAME} SHARED ${SRCS} ${QRCS})
 
-target_include_directories(${LIB_NAME} PUBLIC
-    ${DtkWidget_INCLUDE_DIRS}
-    ${DtkGUI_INCLUDE_DIRS}
-)
-
 target_link_libraries(${LIB_NAME} PRIVATE
     ${Qt_LIBS}
-    ${DtkWidget_LIBRARIES}
+    ${DTK_LIBS}
     ${DtkGUI_LIBRARIES}
 )
 

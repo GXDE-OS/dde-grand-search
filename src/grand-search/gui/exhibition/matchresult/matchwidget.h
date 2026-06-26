@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -37,6 +37,12 @@ public slots:
 
     void onPreviewStateChanged(const bool preview);
 
+    /**
+     * @brief 设置搜索关键词，传播到所有 GroupWidget 以管理高亮任务
+     * @param keyword 搜索关键词
+     */
+    void setSearchKeyword(const QString &keyword);
+
 private slots:
     void onSelectItemByMouse(const MatchedItem &item);
 
@@ -74,6 +80,8 @@ protected:
     // 对要显示的类目列表进行排序
     void sortVislibleGroupList();
 
+    MatchedItems deduplicateAgainstBestMatch(const MatchedItems &items, const QString &groupName);
+
     void paintEvent(QPaintEvent *event) override;
     void resizeEvent(QResizeEvent* event) override;
 
@@ -92,6 +100,7 @@ private:
 
     bool m_customSelected = false;                      // 记录用户是否手动选中
     bool m_isPreviewItem = false;                       // 记录当前是否预览项目
+    QString m_currentKeyword;                          // 当前搜索关键词，创建分组时同步设置
 };
 
 }

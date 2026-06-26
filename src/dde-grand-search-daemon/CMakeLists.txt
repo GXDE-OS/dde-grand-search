@@ -12,9 +12,11 @@ set(BIN_NAME ${DAEMON_BIN_NAME})
 
 # 依赖包
 find_package(PkgConfig REQUIRED)
-find_package(DtkCore REQUIRED)
-find_package(DtkWidget REQUIRED)
-find_package(Qt5 COMPONENTS
+find_package(${DTK_NS} COMPONENTS
+    Gui
+    Widget
+REQUIRED)
+find_package(${QT_NS} COMPONENTS
     Core
     Gui
     Widgets
@@ -22,23 +24,29 @@ find_package(Qt5 COMPONENTS
     DBus
 REQUIRED)
 find_package(deepin-qdbus-service REQUIRED)
+find_package(dfm${DTK_VERSION_MAJOR}-search REQUIRED)
 
 add_definitions(-DSERVICE_CONFIG_DIR="${CMAKE_INSTALL_PREFIX}/share/deepin-service-manager/")
 
 set(Qt_LIBS
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Widgets
-    Qt5::DBus
-    Qt5::Concurrent
+    ${QT_NS}::Core
+    ${QT_NS}::Gui
+    ${QT_NS}::Widgets
+    ${QT_NS}::DBus
+    ${QT_NS}::Concurrent
+)
+
+set(DTK_LIBS
+    ${DTK_NS}::Gui
+    ${DTK_NS}::Widget
 )
 
 # 依赖库
 set(LINK_LIBS
     ${Qt_LIBS}
-    ${DtkCore_LIBRARIES}
-    ${DtkWidget_LIBRARIES}
+    ${DTK_LIBS}
     ${deepin-qdbus-service_LIBRARIES}
+    dfm${DTK_VERSION_MAJOR}-search
 )
 
 # 源文件
@@ -86,48 +94,29 @@ set(SEARCHER
     searcher/extend/extendsearcher.cpp
     searcher/extend/extendworker.h
     searcher/extend/extendworker.cpp
+    searcher/file/filenamesearcher.h
+    searcher/file/filenamesearcher.cpp
+    searcher/file/filenameworker.h
+    searcher/file/filenameworker.cpp
+    searcher/file/filenameworker_p.h
+    searcher/file/filesearchutils.h
+    searcher/file/filesearchutils.cpp
+    searcher/ocr/ocrtextsearcher.h
+    searcher/ocr/ocrtextsearcher.cpp
+    searcher/ocr/ocrtextworker.h
+    searcher/ocr/ocrtextworker.cpp
+    searcher/ocr/ocrtextworker_p.h
+    searcher/fulltext/fulltextsearcher.h
+    searcher/fulltext/fulltextsearcher.cpp
+    searcher/fulltext/fulltextworker.h
+    searcher/fulltext/fulltextworker.cpp
+    searcher/fulltext/fulltextworker_p.h
 )
 
-#文件搜索
-if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "mips"
-        OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64"
-        OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "sw"
-        OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "loongarch64"
-        )
-    message(${CMAKE_SYSTEM_PROCESSOR} ": using fsearch")
-    ADD_DEFINITIONS(-DENABLE_FSEARCH)
-    FILE(GLOB 3RD_FSEARCH_SRC ${PROJECT_3RDPARTY_PATH}/fsearch/*)
-    pkg_check_modules(GLIB REQUIRED glib-2.0)
-    pkg_check_modules(PCRE REQUIRED libpcre)
+if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" AND OPT_ENABLE_AI_SEARCH)
+    ADD_DEFINITIONS(-DENABLE_SEMANTIC)
     set(SEARCHER
         ${SEARCHER}
-        ${3RD_FSEARCH_SRC}
-        searcher/file/fssearcher.h
-        searcher/file/fssearcher.cpp
-        searcher/file/fsworker.h
-        searcher/file/fsworker.cpp
-        searcher/file/filesearchutils.h
-        searcher/file/filesearchutils.cpp
-    )
-    set(LINK_LIBS
-        ${LINK_LIBS}
-        ${GLIB_LIBRARIES}
-        ${PCRE_LIBRARIES}
-    )
-else ()
-    message(${CMAKE_SYSTEM_PROCESSOR} ": using deepin-anything.")
-    ADD_DEFINITIONS(-DENABLE_DEEPINANYTHING)
-    set(SEARCHER
-        ${SEARCHER}
-        searcher/file/filenamesearcher.h
-        searcher/file/filenamesearcher.cpp
-        searcher/file/filenameworker.h
-        searcher/file/filenameworker.cpp
-        searcher/file/filenameworker_p.h
-        searcher/file/filesearchutils.h
-        searcher/file/filesearchutils.cpp
-        ${PROJECT_3RDPARTY_PATH}/interfaces/anything_interface.h
-        ${PROJECT_3RDPARTY_PATH}/interfaces/anything_interface.cpp
         ${SEMANTIC_FILES}
     )
 
@@ -207,8 +196,11 @@ set(SRCS
     ${GDCONFIGURATION}
 )
 
-# 资源文件
-qt5_add_resources(QRC_FILES utils/dict.qrc)
+if (${QT_VERSION_MAJOR} EQUAL 5)
+    qt5_add_resources(QRC_FILES utils/dict.qrc)
+else()
+    qt_add_resources(QRC_FILES utils/dict.qrc)
+endif()
 
 # 执行程序
 add_executable(${BIN_NAME}
@@ -217,8 +209,6 @@ add_executable(${BIN_NAME}
 
 target_include_directories(${BIN_NAME} PUBLIC
     ${CMAKE_SOURCE_DIR}/include
-    ${DtkWidget_INCLUDE_DIRS}
-    ${PROJECT_3RDPARTY_PATH}/fsearch
     ${GLIB_INCLUDE_DIRS}
     ${PCRE_INCLUDE_DIRS}
     ${deepin-qdbus-service_INCLUDE_DIR}

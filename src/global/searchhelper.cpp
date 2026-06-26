@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2022 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -38,12 +38,12 @@ void SearchHelper::initGroupSuffixTable()
 
 void SearchHelper::initGroupSearcherTable()
 {
-    m_groupSearcherHash.insert(DOCUMENT_GROUP, {GRANDSEARCH_CLASS_FILE_DEEPIN, GRANDSEARCH_CLASS_FILE_FSEARCH});
-    m_groupSearcherHash.insert(PICTURE_GROUP, {GRANDSEARCH_CLASS_FILE_DEEPIN, GRANDSEARCH_CLASS_FILE_FSEARCH});
-    m_groupSearcherHash.insert(AUDIO_GROUP, {GRANDSEARCH_CLASS_FILE_DEEPIN, GRANDSEARCH_CLASS_FILE_FSEARCH});
-    m_groupSearcherHash.insert(VIDEO_GROUP, {GRANDSEARCH_CLASS_FILE_DEEPIN, GRANDSEARCH_CLASS_FILE_FSEARCH});
-    m_groupSearcherHash.insert(FILE_GROUP, {GRANDSEARCH_CLASS_FILE_DEEPIN, GRANDSEARCH_CLASS_FILE_FSEARCH});
-    m_groupSearcherHash.insert(FOLDER_GROUP, {GRANDSEARCH_CLASS_FILE_DEEPIN, GRANDSEARCH_CLASS_FILE_FSEARCH});
+    m_groupSearcherHash.insert(DOCUMENT_GROUP, {GRANDSEARCH_CLASS_FILE_DEEPIN});
+    m_groupSearcherHash.insert(PICTURE_GROUP, {GRANDSEARCH_CLASS_FILE_DEEPIN});
+    m_groupSearcherHash.insert(AUDIO_GROUP, {GRANDSEARCH_CLASS_FILE_DEEPIN});
+    m_groupSearcherHash.insert(VIDEO_GROUP, {GRANDSEARCH_CLASS_FILE_DEEPIN});
+    m_groupSearcherHash.insert(FILE_GROUP, {GRANDSEARCH_CLASS_FILE_DEEPIN});
+    m_groupSearcherHash.insert(FOLDER_GROUP, {GRANDSEARCH_CLASS_FILE_DEEPIN});
     m_groupSearcherHash.insert(APPLICATION_GROUP, {GRANDSEARCH_CLASS_APP_DESKTOP});
 }
 

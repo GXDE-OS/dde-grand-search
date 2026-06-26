@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -17,6 +17,10 @@
 #include <QLabel>
 #include <QDBusInterface>
 #include <QDBusReply>
+#include <QFile>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(logTextPreview)
 
 GRANDSEARCH_USE_NAMESPACE
 using namespace GrandSearch::text_preview;
@@ -166,6 +170,7 @@ void TextView::initUI()
 
 void TextView::setSource(const QString &path)
 {
+    qCDebug(logTextPreview) << "Setting text source:" << path;
     m_browser->clear();
     QString lowerPath = path.toLower();
     m_isShowAiToolBar = lowerPath.endsWith(".txt") || lowerPath.endsWith(".doc") || lowerPath.endsWith(".docx")  || lowerPath.endsWith(".xls")
@@ -179,8 +184,10 @@ void TextView::setSource(const QString &path)
         layout()->setContentsMargins(10 + 10, 0, 0 + 10, 0);
         m_stackedWidget->setCurrentWidget(m_browser);
         auto datas = file.read(2048);
+        qCDebug(logTextPreview) << "Text file loaded successfully - Size:" << datas.size() << "bytes";
         m_browser->setPlainText(toUnicode(datas));
     } else {
+        qCWarning(logTextPreview) << "Failed to open text file:" << path;
         showErrorPage();
     }
 }

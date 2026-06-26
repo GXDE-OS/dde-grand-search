@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -12,6 +12,8 @@
 #include "global/searchconfigdefine.h"
 #include "global/builtinsearch.h"
 #include "gui/searchconfig/tipslabel.h"
+#include <utils/report/aisearchpoint.h>
+#include <utils/report/eventlogutil.h>
 
 #include <DFontSizeManager>
 #include <DDialog>
@@ -24,6 +26,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDateTime>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(logGrandSearch)
 
 DWIDGET_USE_NAMESPACE
 DCORE_USE_NAMESPACE
@@ -31,14 +36,16 @@ DCORE_USE_NAMESPACE
 using namespace GrandSearch;
 
 #define INER_APP_NAME "dde-grand-search"
-static QDBusMessage createQueryLangMsg(const QString &method) {
+static QDBusMessage createQueryLangMsg(const QString &method)
+{
     QDBusMessage msg = QDBusMessage::createMethodCall("org.deepin.ai.daemon.QueryLang", "/org/deepin/ai/daemon/QueryLang",
                                                       "org.deepin.ai.daemon.QueryLang", method);
     return msg;
 }
 
 #ifdef VECTOR_SEARCH
-static QDBusMessage createVectorMsg(const QString &method) {
+static QDBusMessage createVectorMsg(const QString &method)
+{
     QDBusMessage msg = QDBusMessage::createMethodCall("org.deepin.ai.daemon.VectorIndex", "/org/deepin/ai/daemon/VectorIndex",
                                                       "org.deepin.ai.daemon.VectorIndex", method);
     return msg;
@@ -48,6 +55,7 @@ static QDBusMessage createVectorMsg(const QString &method) {
 IntelligentRetrievalWidget::IntelligentRetrievalWidget(QWidget *parent)
     : DWidget(parent)
 {
+    qCDebug(logGrandSearch) << "Creating IntelligentRetrievalWidget";
 
     m_mainLayout = new QVBoxLayout();
     setLayout(m_mainLayout);
@@ -68,9 +76,9 @@ IntelligentRetrievalWidget::IntelligentRetrievalWidget(QWidget *parent)
     }
     m_mainLayout->addWidget(m_semantic);
 
-    m_detailLabel = new TipsLabel(tr("When turned on, you can try to search for local documents using natural language descriptions, such as \"last week's documents\".")
-                               , this);
+    m_detailLabel = new TipsLabel(tr("When turned on, you can try to search for local documents using natural language descriptions, such as \"last week's documents\"."), this);
     m_detailLabel->setWordWrap(true);
+    m_detailLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     m_mainLayout->addWidget(m_detailLabel);
 
     m_indexWidget = new QWidget(this);
@@ -91,7 +99,7 @@ IntelligentRetrievalWidget::IntelligentRetrievalWidget(QWidget *parent)
         bkg->setBottomRound(true);
 
         m_featIndex = new SwitchWidget(tr("Automatic index update"), bkg);
-        //m_featIndex->setEnableBackground(true);
+        // m_featIndex->setEnableBackground(true);
         m_featIndex->setFixedSize(SWITCHWIDGETWIDTH, DETAILSWITCHWIDGETHEIGHT / 2);
         m_featIndex->setIconEnable(false);
 
@@ -126,8 +134,9 @@ IntelligentRetrievalWidget::IntelligentRetrievalWidget(QWidget *parent)
         }
 
         m_indexLayout->addSpacing(5);
-        m_fullTextLabel = new TipsLabel(tr("When turned on, full text search can be used in the file manager and grand search.")
-                                   , this);
+        m_fullTextLabel = new TipsLabel(tr("When turned on, full text search can be used in the file manager and grand search."), this);
+        m_fullTextLabel->setWordWrap(true);
+        m_fullTextLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         auto margin = m_fullTextLabel->contentsMargins();
         margin.setLeft(10);
         m_fullTextLabel->setContentsMargins(margin);
@@ -145,7 +154,7 @@ IntelligentRetrievalWidget::IntelligentRetrievalWidget(QWidget *parent)
         bkg->setLayout(vl);
         vl->setContentsMargins(0, 2, 0, 5);
         m_embWidget = new EmbeddingPluginWidget(bkg);
-        m_embWidget->setText(tr("Embedding Plugins"),tr("After installing the model, you can use services such as AI Search and UOS AI Assistant.."));
+        m_embWidget->setText(tr("Embedding Plugins"), tr("After installing the model, you can use services such as AI Search and UOS AI Assistant.."));
         m_embWidget->checkInstallStatus();
         vl->addWidget(m_embWidget);
         m_indexLayout->addSpacing(10);
@@ -163,7 +172,7 @@ IntelligentRetrievalWidget::IntelligentRetrievalWidget(QWidget *parent)
         bkg->setLayout(vl);
         vl->setContentsMargins(0, 2, 0, 5);
         m_llmWidget = new LLMWidget(bkg);
-        m_llmWidget->setText(tr("UOS AI LLM"),tr("After installing the UOS AI large model, you can use the AI intelligent search function without an internet connection."));
+        m_llmWidget->setText(tr("ULLM"), tr("After installing the ULLM, you can use the AI intelligent search function without an internet connection."));
         m_llmWidget->checkInstallStatus();
         vl->addWidget(m_llmWidget);
         m_indexLayout->addSpacing(10);
@@ -192,6 +201,8 @@ IntelligentRetrievalWidget::IntelligentRetrievalWidget(QWidget *parent)
 #endif
     connect(m_featIndex, &SwitchWidget::checkedChanged, this, &IntelligentRetrievalWidget::checkChanged);
     connect(m_fullTextIndex, &SwitchWidget::checkedChanged, this, &IntelligentRetrievalWidget::checkChanged);
+
+    qCDebug(logGrandSearch) << "IntelligentRetrievalWidget created - AI Search enabled:" << turnOn;
 }
 
 void IntelligentRetrievalWidget::updateState()
@@ -233,7 +244,7 @@ void IntelligentRetrievalWidget::updateState()
         m_vector->checkBox()->setChecked(false);
         m_vector->checkBox()->setEnabled(false);
         m_vector->setDetail(tr("Please install %0 in <a href=\"%0\">the app store</a> before turning on this configuration.")
-                            .arg("向量化模型"));
+                                    .arg("向量化模型"));
 
         m_enableIndex->setChecked(false);
         m_enableIndex->setEnabled(false);
@@ -245,7 +256,7 @@ void IntelligentRetrievalWidget::updateState()
 
 void IntelligentRetrievalWidget::openAppStore(const QString &app)
 {
-    qDebug() << "open app store" << app;
+    qCDebug(logGrandSearch) << "Opening application store - App:" << app;
     QDBusMessage msg = QDBusMessage::createMethodCall("com.home.appstore.client", "/com/home/appstore/client",
                                                       "com.home.appstore.client", "openBusinessUri");
     QVariantList list;
@@ -255,7 +266,8 @@ void IntelligentRetrievalWidget::openAppStore(const QString &app)
     QDBusPendingReply<void> ret = QDBusConnection::sessionBus().asyncCall(msg, 100);
     ret.waitForFinished();
     if (ret.error().type() != QDBusError::NoError)
-        qWarning() << "error: " << msg.service() << QDBusError::errorString(ret.error().type());
+        qCWarning(logGrandSearch) << "Failed to open application store - Service:" << msg.service()
+                                  << "Error:" << QDBusError::errorString(ret.error().type());
 
     return;
 }
@@ -265,20 +277,20 @@ void IntelligentRetrievalWidget::updateStatusContent(const QVariantHash &status)
     bool ok = false;
     int st = status.value("completion").toInt(&ok);
     if (!ok) {
-        qWarning() << "get invalid index statuas" << st;
+        qCWarning(logGrandSearch) << "Invalid index status value - Value:" << st;
         st = -1;
     }
 
     if (st == 0) {
         m_indexStatus->updateContent(AutoIndexStatus::Updating,
-                    tr("Intelligent search indexing is being updated, which may take up more resources, please keep the power access."));
+                                     tr("Intelligent search indexing is being updated, which may take up more resources, please keep the power access."));
     } else if (st == 1) {
         auto dt = QDateTime::fromSecsSinceEpoch(status.value("updatetime").toLongLong());
         m_indexStatus->updateContent(AutoIndexStatus::Success,
-                    tr("Smart Search indexing update is complete. Last update time: %0").arg(dt.toString("yyyy-MM-dd hh:mm:ss")));
+                                     tr("Smart Search indexing update is complete. Last update time: %0").arg(dt.toString("yyyy-MM-dd hh:mm:ss")));
     } else {
         m_indexStatus->updateContent(AutoIndexStatus::Fail,
-                    tr("Indexing error!"));
+                                     tr("Indexing error!"));
     }
 }
 
@@ -310,11 +322,12 @@ void IntelligentRetrievalWidget::checkChanged()
     if (sd == m_semantic) {
         bool on = m_semantic->checked();
         cfg->setConfig(GRANDSEARCH_SEMANTIC_GROUP, GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC_ANALYSIS, on);
+        ReportIns()->writeEvent(report::AiSearchPoint(on).assemblingData());
         m_indexWidget->setVisible(on);
         adjustSize();
 
-        //m_featIndex->setChecked(on);
-        //m_fullTextIndex->setChecked(on);
+        // m_featIndex->setChecked(on);
+        // m_fullTextIndex->setChecked(on);
         if (!on) {
             this->setAutoIndex(on);
             this->setFulltextQuery(on);
@@ -326,14 +339,14 @@ void IntelligentRetrievalWidget::checkChanged()
             warningDlg.setWindowFlags((warningDlg.windowFlags() | Qt::WindowType::WindowStaysOnTopHint));
             warningDlg.setFixedWidth(380);
             warningDlg.setIcon(QIcon(":icons/dde-grand-search-setting.svg"));
-            warningDlg.setMessage(QString(tr("To use AI Smart Search, you need to install the Embedding Plugins and UOS AI LLM first.")));
+            warningDlg.setMessage(QString(tr("To use AI Smart Search, you need to install the Embedding Plugins and ULLM first.")));
             warningDlg.addButton(tr("OK"), true, DDialog::ButtonNormal);
             warningDlg.moveToCenter();
             warningDlg.exec();
         }
     }
 #ifdef VECTOR_SEARCH
-    else if (sd == m_vector->checkBox()){
+    else if (sd == m_vector->checkBox()) {
         bool on = m_vector->checkBox()->isChecked();
         cfg->setConfig(GRANDSEARCH_SEMANTIC_GROUP, GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC_VECTOR, on);
         // 关闭搜索时联动关闭索引
@@ -366,7 +379,9 @@ QVariantHash IntelligentRetrievalWidget::getIndexStatus()
 
     ret.waitForFinished();
     if (ret.error().type() != QDBusError::NoError) {
-        qWarning() << "error: " << msg.service() << QDBusError::errorString(ret.error().type()) << ret;
+        qCWarning(logGrandSearch) << "Failed to get semantic status - Service:" << msg.service()
+                                  << "Error:" << QDBusError::errorString(ret.error().type())
+                                  << "Response:" << ret;
         return QVariantHash();
     }
 
@@ -394,23 +409,25 @@ void IntelligentRetrievalWidget::updateIndexStatusContent(const QVariantHash &st
     bool ok = (status.value("completion", 0).toInt() == 1);
     if (!ok) {
         m_indexStatus->updateContent(AutoIndexStatus::Updating,
-                    tr("Intelligent search indexing is being updated, which may take up more resources, please keep the power access."));
+                                     tr("Intelligent search indexing is being updated, which may take up more resources, please keep the power access."));
     } else {
         auto dt = QDateTime::fromSecsSinceEpoch(status.value("updatetime", 0).toLongLong());
         m_indexStatus->updateContent(AutoIndexStatus::Success,
-                    tr("Smart Search indexing update is complete. Last update time: %0").arg(dt.toString("yyyy-MM-dd hh:mm:ss")));
+                                     tr("Smart Search indexing update is complete. Last update time: %0").arg(dt.toString("yyyy-MM-dd hh:mm:ss")));
     }
 }
 
 void IntelligentRetrievalWidget::setFulltextQuery(bool on)
 {
+    qCDebug(logGrandSearch) << "Full text search configuration changed - Enabled:" << on;
+
     SearchConfig::instance()->setConfig(GRANDSEARCH_SEMANTIC_GROUP, GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC_FULLTEXT, on);
     // 调用文管接口，没开就打开
     if (on) {
         DConfig *dcfg = DConfig::create("org.deepin.dde.file-manager", "org.deepin.dde.file-manager.search");
         bool isTrue = dcfg->value("enableFullTextSearch").toBool();
         if (!isTrue) {
-            qDebug() << "DCONFIG enableFullTextSearch(false => true)";
+            qCDebug(logGrandSearch) << "Enabling full text search in file manager configuration";
             dcfg->setValue("enableFullTextSearch", true);
         }
         delete dcfg;
@@ -429,9 +446,10 @@ void IntelligentRetrievalWidget::setAutoIndex(bool on)
     QDBusPendingReply<void> ret = QDBusConnection::sessionBus().asyncCall(msg, 500);
     ret.waitForFinished();
     if (ret.error().type() != QDBusError::NoError) {
-        qWarning() << "error: " << msg.service() << QDBusError::errorString(ret.error().type());
+        qCWarning(logGrandSearch) << "Failed to set auto index - Service:" << msg.service()
+                                  << "Error:" << QDBusError::errorString(ret.error().type());
     }
-    return ;
+    return;
 }
 
 bool IntelligentRetrievalWidget::getIndexStatus(QVariantHash &statuts)
@@ -445,7 +463,9 @@ bool IntelligentRetrievalWidget::getIndexStatus(QVariantHash &statuts)
     ret.waitForFinished();
 
     if (ret.error().type() != QDBusError::NoError) {
-        qWarning() << "error: " << msg.service() << QDBusError::errorString(ret.error().type()) << ret;
+        qCWarning(logGrandSearch) << "Failed to get index status - Service:" << msg.service()
+                                  << "Error:" << QDBusError::errorString(ret.error().type())
+                                  << "Response:" << ret;
         return false;
     }
 

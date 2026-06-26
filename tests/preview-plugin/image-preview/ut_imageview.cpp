@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -10,6 +10,7 @@
 #include <gtest/gtest.h>
 
 #include <DLabel>
+#include <global/widgets/highlightlabel.h>
 
 #include <QSize>
 #include <QMovie>

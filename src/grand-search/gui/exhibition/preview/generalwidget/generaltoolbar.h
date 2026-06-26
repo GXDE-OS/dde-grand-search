@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -15,11 +15,17 @@ class QHBoxLayout;
 
 namespace GrandSearch {
 
-class IconButton: public QToolButton
+class ToolButton: public QToolButton
 {
     Q_OBJECT
 public:
-    explicit IconButton(QWidget *parent = nullptr);
+    explicit ToolButton(QWidget *parent = nullptr);
+
+protected:
+    void paintEvent(QPaintEvent *event) override;
+
+private:
+    void updatePalette();
 };
 
 class GeneralToolBar : public Dtk::Widget::DWidget
@@ -40,9 +46,9 @@ private:
 private:
     QHBoxLayout* m_hMainLayout = nullptr;
 
-    IconButton *m_openBtn = nullptr;
-    IconButton *m_openPathBtn = nullptr;
-    IconButton *m_copyPathBtn = nullptr;
+    ToolButton *m_openBtn = nullptr;
+    ToolButton *m_openPathBtn = nullptr;
+    ToolButton *m_copyPathBtn = nullptr;
 
     Dtk::Widget::DVerticalLine* m_vLine1 = nullptr;
     Dtk::Widget::DVerticalLine* m_vLine2 = nullptr;

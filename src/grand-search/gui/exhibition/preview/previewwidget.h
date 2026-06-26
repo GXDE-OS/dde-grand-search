@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -29,6 +29,14 @@ public:
 
     // 预览指定搜索项
     bool previewItem(const MatchedItem &item);
+
+    /**
+     * @brief 更新当前预览项的高亮内容
+     * 当 HighlightProvider 异步获取到高亮内容时调用
+     * @param filePath 文件路径
+     * @param content 高亮内容
+     */
+    void updateHighlightContent(const QString &filePath, const QString &content);
 
 private:
     void initUi();

@@ -1,269 +1,297 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "filenameworker_p.h"
 #include "global/builtinsearch.h"
-#include "global/commontools.h"
 #include "utils/specialtools.h"
-#include "global/searchhelper.h"
 #include "configuration/configer.h"
 
-#include "interfaces/anything_interface.h"
-
 #include <QStandardPaths>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(logDaemon)
 
 using namespace GrandSearch;
+DFM_SEARCH_USE_NS
 
-#define MAX_SEARCH_NUM 100
+#define MAX_SEARCH_NUM_GROUP 100
+#define MAX_SEARCH_NUM_TOTAL 10000
 #define EMIT_INTERVAL 50
 
 FileNameWorkerPrivate::FileNameWorkerPrivate(FileNameWorker *qq)
     : q_ptr(qq)
 {
-    // 搜索目录为user
-    QStringList homePaths = QStandardPaths::standardLocations(QStandardPaths::HomeLocation);
-    if (!homePaths.isEmpty())
-        m_searchPath = homePaths.first();
-
-    initAnything();
+    qCDebug(logDaemon) << "FileNameWorkerPrivate constructor called";
+    m_searchPath = QDir::homePath();
     initConfig();
 }
 
 void FileNameWorkerPrivate::initConfig()
 {
+    qCDebug(logDaemon) << "Initializing file search configuration";
+
     // 获取支持的搜索类目
     auto config = ConfigerIns->group(GRANDSEARCH_CLASS_FILE_DEEPIN);
-    if (config->value(GRANDSEARCH_GROUP_FOLDER, false))
+    if (config->value(GRANDSEARCH_GROUP_FOLDER, false)) {
+        qCDebug(logDaemon) << "Folder search enabled";
         m_resultCountHash.insert(FileSearchUtils::Folder, 0);
+    }
 
-    if (config->value(GRANDSEARCH_GROUP_FILE, false))
+    if (config->value(GRANDSEARCH_GROUP_FILE, false)) {
         m_resultCountHash.insert(FileSearchUtils::File, 0);
+        qCDebug(logDaemon) << "File search enabled";
+    }
 
-    if (config->value(GRANDSEARCH_GROUP_FILE_VIDEO, false))
+    if (config->value(GRANDSEARCH_GROUP_FILE_VIDEO, false)) {
         m_resultCountHash.insert(FileSearchUtils::Video, 0);
+        qCDebug(logDaemon) << "Video search enabled";
+    }
 
-    if (config->value(GRANDSEARCH_GROUP_FILE_AUDIO, false))
+    if (config->value(GRANDSEARCH_GROUP_FILE_AUDIO, false)) {
         m_resultCountHash.insert(FileSearchUtils::Audio, 0);
+        qCDebug(logDaemon) << "Audio search enabled";
+    }
 
-    if (config->value(GRANDSEARCH_GROUP_FILE_PICTURE, false))
+    if (config->value(GRANDSEARCH_GROUP_FILE_PICTURE, false)) {
         m_resultCountHash.insert(FileSearchUtils::Picture, 0);
+        qCDebug(logDaemon) << "Picture search enabled";
+    }
 
-    if (config->value(GRANDSEARCH_GROUP_FILE_DOCUMNET, false))
+    if (config->value(GRANDSEARCH_GROUP_FILE_DOCUMNET, false)) {
         m_resultCountHash.insert(FileSearchUtils::Document, 0);
-}
+        qCDebug(logDaemon) << "Document search enabled";
+    }
 
-void FileNameWorkerPrivate::initAnything()
-{
-    Q_Q(FileNameWorker);
-
-    m_anythingInterface = new ComDeepinAnythingInterface("com.deepin.anything",
-                                                         "/com/deepin/anything",
-                                                         QDBusConnection::systemBus(),
-                                                         q);
-    m_anythingInterface->setTimeout(1000);
-
-    // 自动索引内置磁盘
-    if (!m_anythingInterface->autoIndexInternal())
-        m_anythingInterface->setAutoIndexInternal(true);
-}
-
-QFileInfoList FileNameWorkerPrivate::traverseDirAndFile(const QString &path)
-{
-    QDir dir(path);
-    if (!dir.exists())
-        return {};
-
-    dir.setFilter(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
-    auto result = dir.entryInfoList();
-    // 排序
-    qSort(result.begin(), result.end(), [](const QFileInfo &info1, const QFileInfo &info2) {
-        static QStringList sortList{"Desktop", "Music", "Downloads", "Documents", "Pictures", "Videos"};
-        int index1 = sortList.indexOf(info1.fileName());
-        int index2 = sortList.indexOf(info2.fileName());
-
-        if (index1 == -1)
-            return false;
-        else if (index2 == -1)
-            return true;
-
-        return index1 < index2;
-    });
-
-    return result;
+    qCDebug(logDaemon) << "Search groups enabled:" << m_resultCountHash.keys();
 }
 
 bool FileNameWorkerPrivate::appendSearchResult(const QString &fileName)
 {
     Q_Q(FileNameWorker);
 
-    if (m_tmpSearchResults.contains(fileName))
+    if (m_tmpSearchResults.contains(fileName)) {
+        qCDebug(logDaemon) << "Duplicate file result ignored:" << fileName;
         return false;
+    }
 
     auto group = FileSearchUtils::getGroupByName(fileName);
-    Q_ASSERT(group >= FileSearchUtils::GroupBegin && group< FileSearchUtils::GroupCount);
+    Q_ASSERT(group >= FileSearchUtils::GroupBegin && group < FileSearchUtils::GroupCount);
 
     // 根据搜索类目配置判断是否需要进行添加
     if (!m_resultCountHash.contains(group)) {
-        if (group == FileSearchUtils::Folder)
+        if (group == FileSearchUtils::Folder) {
+            qCDebug(logDaemon) << "Folder result ignored - Folder search not enabled:" << fileName;
             return false;
+        }
 
         if (m_resultCountHash.contains(FileSearchUtils::File)) {
             group = FileSearchUtils::File;
+            qCDebug(logDaemon) << "File moved to generic File group:" << fileName;
         } else {
+            qCDebug(logDaemon) << "File result ignored - No matching group enabled:" << fileName;
             return false;
         }
     }
 
-    if (!FileSearchUtils::fileShouldVisible(fileName, group, m_searchInfo))
-        return false;
-
-    if (m_resultCountHash[group] >= MAX_SEARCH_NUM || FileSearchUtils::filterByBlacklist(fileName))
+    if (m_resultCountHash[group] >= MAX_SEARCH_NUM_GROUP)
         return false;
 
     m_tmpSearchResults << fileName;
-    const auto &item = FileSearchUtils::packItem(fileName, q->name());
+    // Get keywords for highlighting
+    QStringList keywords { m_searchInfo.keyword };
+    if (!m_searchInfo.boolKeywords.isEmpty()) {
+        keywords = m_searchInfo.boolKeywords;
+    } else if (!m_searchInfo.typeKeywords.isEmpty()) {
+        keywords = m_searchInfo.typeKeywords;
+    }
+    const auto &item = FileSearchUtils::packItem(fileName, q->name(), keywords);
+
     QMutexLocker lk(&m_mutex);
     m_items[group].append(item);
     m_resultCountHash[group]++;
 
+    qCDebug(logDaemon) << "Search result added - File:" << fileName << "Group:" << group
+                       << "Group count:" << m_resultCountHash[group];
+
     // 非文件类目搜索，不需要向文件类目中添加搜索结果
-    if (m_searchInfo.isCombinationSearch && !m_searchInfo.groupList.contains(FileSearchUtils::File))
+    if (m_searchInfo.isCombinationSearch && !m_searchInfo.groupList.contains(FileSearchUtils::File)) {
+        qCDebug(logDaemon) << "Combination search - File group not included, skipping file group addition";
         return true;
+    }
 
     // 文档、音频、视频、图片需添加到文件组中
     if (group != FileSearchUtils::File && m_resultCountHash.contains(FileSearchUtils::File)) {
-        if (group != FileSearchUtils::Folder && m_resultCountHash[FileSearchUtils::File] < MAX_SEARCH_NUM) {
+        if (group != FileSearchUtils::Folder && m_resultCountHash[FileSearchUtils::File] < MAX_SEARCH_NUM_GROUP) {
             m_items[FileSearchUtils::File].append(item);
             m_resultCountHash[FileSearchUtils::File]++;
+            qCDebug(logDaemon) << "File also added to File group - File group count:"
+                               << m_resultCountHash[FileSearchUtils::File];
         }
     }
 
     return true;
 }
 
-bool FileNameWorkerPrivate::searchUserPath()
+SearchOptions FileNameWorkerPrivate::createSearchOptions() const
 {
-    QFileInfoList fileInfoList = traverseDirAndFile(m_searchPath);
-    // 先对user目录下进行搜索
-    for (const auto &info : fileInfoList) {
-        //中断
-        if (m_status.loadAcquire() != ProxyWorker::Runing)
-            return false;
+    qCDebug(logDaemon) << "Creating search options - Path:" << m_searchPath;
 
-        if (info.isDir())
-            m_searchDirList << info.absoluteFilePath();
+    SearchOptions options;
+    options.setSearchPath(m_searchPath);
 
-        QRegExp reg(m_searchInfo.keyword, Qt::CaseInsensitive);
-        if (info.fileName().contains(reg)) {
-            auto absoluteFilePath = info.absoluteFilePath();
+    auto config = Configer::instance()->group(GRANDSEARCH_BLACKLIST_GROUP);
+    auto blacklist = config->value(GRANDSEARCH_BLACKLIST_PATH, QStringList());
+    options.setSearchExcludedPaths(blacklist);
 
-            // 过滤文管设置的隐藏文件
-            if (SpecialTools::isHiddenFile(absoluteFilePath, m_hiddenFilters, QDir::homePath()))
-                continue;
-
-            // 去除掉添加的data前缀
-            if (m_hasTransformed && absoluteFilePath.startsWith(m_searchPath))
-                absoluteFilePath.replace(m_searchPath, m_originalSearchPath);
-
-            appendSearchResult(absoluteFilePath);
-
-            //推送
-            tryNotify();
-
-            if (isResultLimit())
-                break;
-        }
+    // 检查文件名索引目录是否可用，如果不可用则回退到实时搜索
+    if (DFMSEARCH::Global::isFileNameIndexDirectoryAvailable()) {
+        qCDebug(logDaemon) << "Using indexed search method";
+        options.setSearchMethod(SearchMethod::Indexed);
+    } else {
+        qCWarning(logDaemon) << "File name index directory is not available, falling back to realtime search";
+        options.setSearchMethod(SearchMethod::Realtime);
     }
 
-    int leave = itemCount();
-    qInfo() << "user path search found items:" << m_resultCountHash
-            << "total spend:" << m_time.elapsed()
-            << "current items" << leave;
-
-    return true;
+    options.setMaxResults(MAX_SEARCH_NUM_TOTAL);
+    qCDebug(logDaemon) << "Search options configured - Max results:" << MAX_SEARCH_NUM_TOTAL;
+    return options;
 }
 
-bool FileNameWorkerPrivate::searchByAnything()
+SearchQuery FileNameWorkerPrivate::createSearchQuery() const
 {
-    // 搜索
-    quint32 searchStartOffset = 0;
-    quint32 searchEndOffset = 0;
-    // 过滤系统隐藏文件
-    QRegExp hiddenFileFilter("^(?!.*/\\..*).+$");
-    while (!isResultLimit() && !m_searchDirList.isEmpty()) {
-        //中断
-        if (m_status.loadAcquire() != ProxyWorker::Runing)
-            return false;
+    const QString &keyword = m_searchInfo.keyword;
+    const QStringList &boolKeywords = m_searchInfo.boolKeywords;
+    const QStringList &typeKeywords = m_searchInfo.typeKeywords;
 
-        QDBusPendingReply<QStringList, uint, uint> result;
-        if (m_supportParallelSearch) {
-            QStringList rules;
-            rules << "0x02100"  // 搜索做大数量，100
-                  << "0x40."    // 过滤系统隐藏文件
-                  << "0x011"    // 支持正则表达式
-                  << "0x031"    // 忽略大小写
-                  << "0x061";   // 拼音搜索
-            result = m_anythingInterface->parallelsearch(m_searchDirList.first(), searchStartOffset,
-                                                         searchEndOffset, m_searchInfo.keyword, rules);
+    qCDebug(logDaemon) << "Creating search query - Keyword:" << keyword
+                       << "Bool keywords:" << boolKeywords.size()
+                       << "Type keywords:" << typeKeywords.size();
+
+    bool useBoolQuery = (boolKeywords.size() >= 2);
+    bool useTypeSearch = (typeKeywords.size() >= 2) || m_searchInfo.isCombinationSearch;
+    SearchQuery query;
+
+    if (useTypeSearch) {
+        qCDebug(logDaemon) << "Using type search mode";
+        if (typeKeywords.size() >= 2) {
+            query = SearchFactory::createQuery(typeKeywords, SearchQuery::Type::Boolean);
+            query.setBooleanOperator(SearchQuery::BooleanOperator::OR);
+            qCDebug(logDaemon) << "Created boolean OR query with type keywords";
+        } else if (typeKeywords.size() == 1) {
+            query = SearchFactory::createQuery(typeKeywords.first(), SearchQuery::Type::Simple);
+            qCDebug(logDaemon) << "Created simple query with single type keyword";
         } else {
-            result = m_anythingInterface->search(100, 100, searchStartOffset,
-                                                 searchEndOffset, m_searchDirList.first(), m_searchInfo.keyword,
-                                                 true);
+            query = SearchFactory::createQuery(m_searchInfo.keyword, SearchQuery::Type::Simple);
+            qCDebug(logDaemon) << "Created simple query with main keyword";
+        }
+    } else if (useBoolQuery) {
+        qCDebug(logDaemon) << "Using boolean search mode";
+        query = SearchFactory::createQuery(boolKeywords, SearchQuery::Type::Boolean);
+    } else {
+        SearchQuery::Type queryType = FileSearchUtils::hasWildcard(keyword)
+                ? SearchQuery::Type::Wildcard
+                : SearchQuery::Type::Simple;
+        query = SearchFactory::createQuery(keyword, queryType);
+        qCDebug(logDaemon) << "Created query - Type:" << (queryType == SearchQuery::Type::Wildcard ? "Wildcard" : "Simple");
+    }
+
+    qCDebug(logDaemon) << "Search query created successfully";
+    return query;
+}
+
+void FileNameWorkerPrivate::configureFileNameOptions(FileNameOptionsAPI &fileNameOptions, const SearchQuery &query) const
+{
+    const QString &keyword = m_searchInfo.keyword;
+    const QStringList &typeKeywords = m_searchInfo.typeKeywords;
+
+    qCDebug(logDaemon) << "Configuring file name options";
+
+    bool useTypeSearch = (typeKeywords.size() >= 2) || m_searchInfo.isCombinationSearch;
+
+    if (useTypeSearch) {
+        qCDebug(logDaemon) << "Type search configuration - Enabling pinyin and setting file types";
+        fileNameOptions.setPinyinEnabled(true);
+        fileNameOptions.setPinyinAcronymEnabled(true);
+        fileNameOptions.setFileTypes(FileSearchUtils::buildDFMSearchFileTypes(m_searchInfo.groupList));
+        fileNameOptions.setFileExtensions(m_searchInfo.suffixList);
+        qCDebug(logDaemon) << "File extensions configured:" << m_searchInfo.suffixList;
+    } else if (query.type() == SearchQuery::Type::Boolean) {
+        qCDebug(logDaemon) << "Boolean query configuration - Enabling pinyin";
+        fileNameOptions.setPinyinEnabled(true);
+        fileNameOptions.setPinyinAcronymEnabled(true);
+    } else if (query.type() == SearchQuery::Type::Wildcard) {
+        qCDebug(logDaemon) << "Wildcard query configuration - Disabling pinyin";
+        // 通配符搜索通常不需要拼音支持，因为用户输入的是精确的模式
+        fileNameOptions.setPinyinEnabled(false);
+        fileNameOptions.setPinyinAcronymEnabled(false);
+    } else if (FileSearchUtils::isPinyin(keyword)) {
+        qCDebug(logDaemon) << "Pinyin keyword detected - Enabling pinyin support";
+        fileNameOptions.setPinyinEnabled(true);
+        fileNameOptions.setPinyinAcronymEnabled(true);
+    }
+}
+
+bool FileNameWorkerPrivate::processSearchResults(const SearchResultExpected &result)
+{
+    qCDebug(logDaemon) << "Processing search results";
+
+    if (!result.hasValue()) {
+        qCWarning(logDaemon) << "Search failed for keyword:" << m_searchInfo.keyword
+                             << "Error:" << result.error().message();
+        return false;
+    }
+
+    int index = 0;
+    for (const auto &file : result.value()) {
+        if (m_status.loadAcquire() != ProxyWorker::Runing)
+            return false;
+
+        appendSearchResult(file.path());
+
+        // 推送
+        tryNotify();
+
+        // perf: 降频
+        if (index % 100 == 0 && isResultLimit()) {
+            qCDebug(logDaemon) << "Result limit reached - Breaking search loop at index:" << index;
+            break;
         }
 
-        // fix bug 93806
-        // 直接判断errorType为NoError，需要先取值再判断
-        QStringList searchResults = result.argumentAt<0>();
-        if (result.error().type() != QDBusError::NoError) {
-            qWarning() << "deepin-anything search failed:"
-                       << QDBusError::errorString(result.error().type())
-                       << result.error().message();
-            searchStartOffset = searchEndOffset = 0;
-            m_searchDirList.removeAt(0);
-            continue;
-        }
-
-        if (!m_supportParallelSearch)
-            searchResults = searchResults.filter(hiddenFileFilter);
-        searchStartOffset = result.argumentAt<1>();
-        searchEndOffset = result.argumentAt<2>();
-
-        // 当前目录已经搜索到了结尾
-        if (searchStartOffset >= searchEndOffset) {
-            searchStartOffset = searchEndOffset = 0;
-            m_searchDirList.removeAt(0);
-        }
-
-        for (auto &path : searchResults) {
-            //中断
-            if (m_status.loadAcquire() != ProxyWorker::Runing)
-                return false;
-
-            // 去除掉添加的data前缀
-            if (m_hasTransformed && path.startsWith(m_searchPath))
-                path.replace(m_searchPath, m_originalSearchPath);
-
-            // 过滤文管设置的隐藏文件
-            if (SpecialTools::isHiddenFile(path, m_hiddenFilters, QDir::homePath()))
-                continue;
-
-            appendSearchResult(path);
-
-            //推送
-            tryNotify();
-
-            if (isResultLimit())
-                break;
-        }
+        ++index;
     }
 
     int leave = itemCount();
-    qInfo() << "anything search completed, found items:" << m_resultCountHash
-            << "total spend:" << m_time.elapsed()
-            << "current items" << leave;
+    qCInfo(logDaemon) << "Search completed - Results by group:" << m_resultCountHash
+                      << "Time elapsed:" << m_time.elapsed() << "ms"
+                      << "Total items:" << leave;
 
     return true;
+}
+
+bool FileNameWorkerPrivate::searchByDFMSearch()
+{
+    qCDebug(logDaemon) << "Starting DFM search with keyword:" << m_searchInfo.keyword;
+    QObject holder;
+    SearchEngine *engine = SearchFactory::createEngine(SearchType::FileName, &holder);
+
+    // 创建搜索选项
+    SearchOptions options = createSearchOptions();
+    // 创建搜索查询
+    SearchQuery query = createSearchQuery();
+
+    // 配置文件名选项
+    FileNameOptionsAPI fileNameOptions(options);
+    configureFileNameOptions(fileNameOptions, query);
+
+    // 设置搜索选项
+    engine->setSearchOptions(options);
+    qCDebug(logDaemon) << "Search options configured on engine";
+
+    // 执行搜索并处理结果
+    qCDebug(logDaemon) << "Executing synchronous search";
+    const SearchResultExpected &result = engine->searchSync(query);
+    return processSearchResults(result);
 }
 
 void FileNameWorkerPrivate::tryNotify()
@@ -272,7 +300,7 @@ void FileNameWorkerPrivate::tryNotify()
     int cur = m_time.elapsed();
     if (q->hasItem() && (cur - m_lastEmit) > EMIT_INTERVAL) {
         m_lastEmit = cur;
-        qDebug() << "unearthed, current spend:" << cur;
+        qCDebug(logDaemon) << "Emitting new results - Time elapsed:" << cur << "ms";
         emit q->unearthed(q);
     }
 }
@@ -290,22 +318,27 @@ int FileNameWorkerPrivate::itemCount() const
 
 bool FileNameWorkerPrivate::isResultLimit()
 {
-    const auto &iter = std::find_if(m_resultCountHash.begin(), m_resultCountHash.end(), [](const int &num){
-        return num <= MAX_SEARCH_NUM;
-    });
+    bool limited = false;
+    auto it = m_resultCountHash.cbegin();
+    for (; it != m_resultCountHash.cend(); ++it) {
+        limited = it.value() >= MAX_SEARCH_NUM_GROUP;
+        if (limited)
+            break;
+    }
 
-    return iter == m_resultCountHash.end();
+    return limited;
 }
 
-FileNameWorker::FileNameWorker(const QString &name, bool supportParallelSearch, QObject *parent)
+FileNameWorker::FileNameWorker(const QString &name, QObject *parent)
     : ProxyWorker(name, parent),
       d_ptr(new FileNameWorkerPrivate(this))
 {
-    d_ptr->m_supportParallelSearch = supportParallelSearch;
+    qCDebug(logDaemon) << "FileNameWorker constructor - Name:" << name;
 }
 
 FileNameWorker::~FileNameWorker()
 {
+    qCDebug(logDaemon) << "FileNameWorker destructor called";
     delete d_ptr;
     d_ptr = nullptr;
 }
@@ -315,8 +348,9 @@ void FileNameWorker::setContext(const QString &context)
     Q_D(FileNameWorker);
 
     if (context.isEmpty())
-        qWarning() << "search key is empty.";
+        qCWarning(logDaemon) << "Search key is empty";
     d->m_searchInfo = FileSearchUtils::parseContent(context);
+    qCDebug(logDaemon) << "Parsed search keyword:" << d->m_searchInfo.keyword;
 }
 
 bool FileNameWorker::isAsync() const
@@ -329,51 +363,33 @@ bool FileNameWorker::working(void *context)
     Q_D(FileNameWorker);
     Q_UNUSED(context)
 
-    //准备状态切运行中，否则直接返回
-    if (!d->m_status.testAndSetRelease(Ready, Runing))
-        return false;
+    qCDebug(logDaemon) << "FileNameWorker starting work";
 
-    if (!d->m_anythingInterface->isValid() || d->m_searchInfo.keyword.isEmpty() || d->m_searchPath.isEmpty()) {
+    if (!d->m_status.testAndSetRelease(Ready, Runing)) {
+        qCWarning(logDaemon) << "Failed to start worker - Invalid state transition";
+        return false;
+    }
+
+    if (d->m_searchInfo.keyword.isEmpty() || d->m_searchPath.isEmpty()) {
+        qCWarning(logDaemon) << "Search prerequisites not met - Empty keyword or path";
         d->m_status.storeRelease(Completed);
         return false;
     }
 
+    qCDebug(logDaemon) << "Starting file name search with keyword:" << d->m_searchInfo.keyword;
     d->m_time.start();
 
-    //检查home路径
-    bool useAnything = true;
-    if (!d->m_anythingInterface->hasLFT(d->m_searchPath)) {
-        // 有可能 anything 不支持/home目录，但是支持/data/home
-        const QString &tmpPath = CommonTools::bindPathTransform(d->m_searchPath, true);
-        if (!d->m_anythingInterface->hasLFT(tmpPath)) {
-            qWarning() << "Do not support quick search for " << tmpPath;
-            useAnything = false;
-        } else {
-            d->m_originalSearchPath = d->m_searchPath;
-            d->m_searchPath = tmpPath;
-            d->m_hasTransformed = true;
-        }
+    if (!d->searchByDFMSearch()) {
+        qCWarning(logDaemon) << "Search operation failed";
+        return false;
     }
 
-    if (!d->m_supportParallelSearch) {
-        // 搜索user目录下文件
-        if (!d->searchUserPath())
-            return false; //中断
-    } else {
-        d->m_searchDirList << d->m_searchPath;
-    }
-
-    // 使用anything搜索
-    if (useAnything) {
-        if (!d->searchByAnything())
-            return false; //中断
-    }
-
-    //检查是否还有数据
+    // 检查是否还有数据
     if (d->m_status.testAndSetRelease(Runing, Completed)) {
-        //发送数据
-        if (hasItem())
+        if (hasItem()) {
+            qCDebug(logDaemon) << "Search completed - Emitting final results";
             emit unearthed(this);
+        }
     }
     return true;
 }
@@ -381,7 +397,7 @@ bool FileNameWorker::working(void *context)
 void FileNameWorker::terminate()
 {
     Q_D(FileNameWorker);
-
+    qCDebug(logDaemon) << "Terminating file name worker";
     d->m_status.storeRelease(Terminated);
 }
 
@@ -408,7 +424,9 @@ MatchedItemMap FileNameWorker::takeAll()
 {
     Q_D(FileNameWorker);
 
-    //添加分组
+    qCDebug(logDaemon) << "Taking all search results";
+
+    // 添加分组
     MatchedItemMap ret;
 
     QMutexLocker lk(&d->m_mutex);
@@ -423,5 +441,3 @@ MatchedItemMap FileNameWorker::takeAll()
 
     return ret;
 }
-
-

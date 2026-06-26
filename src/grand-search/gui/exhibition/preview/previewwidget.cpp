@@ -1,17 +1,23 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "previewwidget.h"
 #include "utils/utils.h"
+#include "utils/highlightprovider.h"
 #include "generalpreviewplugin.h"
 #include "generalwidget/detailwidget.h"
 #include "generalwidget/generaltoolbar.h"
 #include "generalwidget/aitoolbar.h"
 #include "pluginproxy.h"
+#include "global/builtinsearch.h"
 
 #include <DScrollArea>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <DGuiApplicationHelper>
+#else
 #include <DApplicationHelper>
+#endif
 #include <DFrame>
 
 #include <QDebug>
@@ -22,25 +28,34 @@
 #include <QScrollBar>
 #include <QToolButton>
 #include <QClipboard>
+#include <QLoggingCategory>
 
 DWIDGET_USE_NAMESPACE
 using namespace GrandSearch;
 
 #define CONTENT_WIDTH           372
 
+Q_DECLARE_LOGGING_CATEGORY(logGrandSearch)
+
 PreviewWidget::PreviewWidget(QWidget *parent)
     : DWidget(parent)
     , m_proxy(new PluginProxy(this))
 {
+    qCDebug(logGrandSearch) << "Creating PreviewWidget";
+
     m_generalPreview = QSharedPointer<PreviewPlugin>(new GeneralPreviewPlugin());
     m_generalPreview->init(m_proxy);
 
     initUi();
     initConnect();
+
+    qCDebug(logGrandSearch) << "PreviewWidget created successfully";
 }
 
 PreviewWidget::~PreviewWidget()
 {
+    qCDebug(logGrandSearch) << "Destroying PreviewWidget";
+
     // 解除当前预览插件界面与预览主界面父子窗口关系，所有预览插件界面统一由插件管理类析构函数释放
     clearLayoutWidgets();
     if (m_vSpaceItem) {
@@ -51,14 +66,19 @@ PreviewWidget::~PreviewWidget()
 
 bool PreviewWidget::previewItem(const MatchedItem &item)
 {
+    qCDebug(logGrandSearch) << "Previewing item:" << item.name << "Type:" << item.type;
+
     m_item = item;
 
     QSharedPointer<PreviewPlugin> preview = QSharedPointer<PreviewPlugin>(m_pluginManager.getPreviewPlugin(item));
 
-    if (!preview)
+    if (!preview) {
+        qCDebug(logGrandSearch) << "Using general preview plugin";
         preview = m_generalPreview;
-    else
+    } else {
+        qCDebug(logGrandSearch) << "Using specific preview plugin";
         preview->init(m_proxy);
+    }
 
     // 插件界面根据新来搜索结果刷新预览内容
     ItemInfo itemInfo;
@@ -67,10 +87,23 @@ bool PreviewWidget::previewItem(const MatchedItem &item)
     itemInfo[PREVIEW_ITEMINFO_ICON] = item.icon;
     itemInfo[PREVIEW_ITEMINFO_TYPE] = item.type;
     itemInfo[PREVIEW_ITEMINFO_SEARCHER] = item.searcher;
+
+    // Pass matched context from extra data
+    QVariantHash extraHash = item.extra.toHash();
+    if (extraHash.contains(GRANDSEARCH_PROPERTY_ITEM_MATCHEDCONTEXT)) {
+        itemInfo[PREVIEW_ITEMINFO_MATCHEDCONTEXT] = extraHash.value(GRANDSEARCH_PROPERTY_ITEM_MATCHEDCONTEXT).toString();
+    }
+
+    // Pass keywords for highlighting
+    if (extraHash.contains(GRANDSEARCH_PROPERTY_ITEM_KEYWORDS)) {
+        itemInfo[PREVIEW_ITEMINFO_KEYWORDS] = extraHash.value(GRANDSEARCH_PROPERTY_ITEM_KEYWORDS).toStringList().join(":");
+    }
+
     preview->previewItem(itemInfo);
 
     // 插件有变更， 更换新插件界面内容到主界面布局中
     if (preview != m_preview) {
+        qCDebug(logGrandSearch) << "Switching preview plugin";
 
         // 清空主界面布局中原有预览插件界面内容
         clearLayoutWidgets();
@@ -154,10 +187,16 @@ void PreviewWidget::initConnect()
     connect(m_generalToolBar, &GeneralToolBar::sigOpenClicked, this, &PreviewWidget::onOpenClicked);
     connect(m_generalToolBar, &GeneralToolBar::sigOpenPathClicked, this, &PreviewWidget::onOpenpathClicked);
     connect(m_generalToolBar, &GeneralToolBar::sigCopyPathClicked, this, &PreviewWidget::onCopypathClicked);
+
+    // 连接高亮内容获取完成信号
+    connect(HighlightProvider::instance(), &HighlightProvider::highlightReady,
+            this, &PreviewWidget::updateHighlightContent);
 }
 
 void PreviewWidget::clearLayoutWidgets()
 {
+    qCDebug(logGrandSearch) << "Clearing preview layout widgets";
+
     if (m_preview) {
         m_preview->stopPreview();
         if (m_preview->contentWidget()) {
@@ -193,16 +232,52 @@ void PreviewWidget::clearLayoutWidgets()
 
 void PreviewWidget::onOpenClicked()
 {
+    qCDebug(logGrandSearch) << "Preview open clicked:" << m_item.name;
     Utils::openMatchedItem(m_item);
 }
 
 void PreviewWidget::onOpenpathClicked()
 {
+    qCDebug(logGrandSearch) << "Preview open path clicked:" << m_item.item;
     Utils::openInFileManager(m_item);
 }
 
 void PreviewWidget::onCopypathClicked()
 {
+    qCDebug(logGrandSearch) << "Preview copy path clicked:" << m_item.item;
     QClipboard *clipboard = QGuiApplication::clipboard();
     clipboard->setText(m_item.item);
+}
+
+void PreviewWidget::updateHighlightContent(const QString &filePath, const QString &content)
+{
+    // 仅当文件路径匹配当前预览项且内容非空时更新
+    if (filePath.isEmpty() || content.isEmpty()
+        || m_item.item != filePath || this->isHidden()) {
+        return;
+    }
+
+    qCDebug(logGrandSearch) << "Updating preview highlight for:" << m_item.name;
+
+    // 更新 m_item 中的 matchedContext
+    QVariantHash extraHash = m_item.extra.toHash();
+    extraHash.insert(GRANDSEARCH_PROPERTY_ITEM_MATCHEDCONTEXT, content);
+    m_item.extra = extraHash;
+
+    // 直接更新当前预览插件的内容标签，避免完整布局重建
+    if (m_preview) {
+        ItemInfo itemInfo;
+        itemInfo[PREVIEW_ITEMINFO_ITEM] = m_item.item;
+        itemInfo[PREVIEW_ITEMINFO_NAME] = m_item.name;
+        itemInfo[PREVIEW_ITEMINFO_ICON] = m_item.icon;
+        itemInfo[PREVIEW_ITEMINFO_TYPE] = m_item.type;
+        itemInfo[PREVIEW_ITEMINFO_SEARCHER] = m_item.searcher;
+        itemInfo[PREVIEW_ITEMINFO_MATCHEDCONTEXT] = content;
+
+        if (extraHash.contains(GRANDSEARCH_PROPERTY_ITEM_KEYWORDS)) {
+            itemInfo[PREVIEW_ITEMINFO_KEYWORDS] = extraHash.value(GRANDSEARCH_PROPERTY_ITEM_KEYWORDS).toStringList().join(":");
+        }
+
+        m_preview->previewItem(itemInfo);
+    }
 }

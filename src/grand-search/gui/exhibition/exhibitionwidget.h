@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -8,6 +8,7 @@
 #include "global/matcheditem.h"
 
 #include <DWidget>
+#include <DVerticalLine>
 
 #include <QScopedPointer>
 
@@ -29,6 +30,12 @@ public:
     ~ExhibitionWidget() override;
 
     void clearData();
+
+    /**
+     * @brief 设置搜索关键词，传播到 MatchWidget 以管理高亮任务
+     * @param keyword 搜索关键词
+     */
+    void setSearchKeyword(const QString &keyword);
 
 public slots:
     void onSelectNextItem();
@@ -61,6 +68,7 @@ private:
     QPushButton *m_btnClear = nullptr;
     MatchWidget *m_matchWidget = nullptr;
     PreviewWidget *m_previewWidget = nullptr;
+    Dtk::Widget::DVerticalLine *m_vLine = nullptr;
 };
 
 }

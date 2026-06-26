@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2022 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -16,14 +16,19 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QItemSelection>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(logGrandSearch)
 
 DWIDGET_USE_NAMESPACE
 
 using namespace GrandSearch;
 
 BlackListWidget::BlackListWidget(QWidget *parent)
-    :DWidget(parent)
+    : DWidget(parent)
 {
+    qCDebug(logGrandSearch) << "Creating BlackListWidget";
+
     m_groupLabel = new QLabel(tr("Excluded path"), this);
     m_groupLabel->adjustSize();
 
@@ -61,29 +66,37 @@ BlackListWidget::BlackListWidget(QWidget *parent)
     connect(m_addButton, &DIconButton::clicked, this, &BlackListWidget::addButtonClicked);
     connect(m_deleteButton, &DIconButton::clicked, this, &BlackListWidget::deleteButtonClicked);
     connect(m_listWrapper, &BlackListWrapper::selectedChanged, this, &BlackListWidget::selectedChanged);
+
+    qCDebug(logGrandSearch) << "BlackListWidget created successfully";
 }
 
 BlackListWidget::~BlackListWidget()
 {
-
+    qCDebug(logGrandSearch) << "Destroying BlackListWidget";
 }
 
 void BlackListWidget::addButtonClicked()
 {
+    qCDebug(logGrandSearch) << "Adding path to blacklist";
+
     QFileDialog fileDialog;
-    auto url = fileDialog.getExistingDirectoryUrl(this, QString("")
-                                                  , QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
-    QFileInfo info(url.toLocalFile());
+    auto dirPath = fileDialog.getExistingDirectory(this, QString(""), QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
+    QFileInfo info(dirPath);
     m_listWrapper->clearSelection();
-    if (!url.isEmpty() && !info.isSymLink() && info.exists()) {
+    if (!dirPath.isEmpty() && !info.isSymLink() && info.exists()) {
+        qCDebug(logGrandSearch) << "Added path to blacklist:" << info.absoluteFilePath();
         m_listWrapper->addRow(info.absoluteFilePath());
     } else {
-        qInfo() << "add path failed";
+        qCWarning(logGrandSearch) << "Failed to add path to blacklist - Path:" << dirPath
+                                  << "Is symlink:" << info.isSymLink()
+                                  << "Exists:" << info.exists();
     }
 }
 
 void BlackListWidget::deleteButtonClicked()
 {
+    qCDebug(logGrandSearch) << "Deleting paths from blacklist";
+
     DeleteDialog dlg(this);
     if (dlg.exec() == QDialog::Accepted) {
         auto selectedRows = m_listWrapper->selectionModel()->selectedRows();
@@ -91,7 +104,12 @@ void BlackListWidget::deleteButtonClicked()
         for (auto index : selectedRows) {
             rowList << index.row();
         }
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         qStableSort(rowList.begin(), rowList.end(), qGreater<int>());
+#else
+        std::stable_sort(rowList.begin(), rowList.end(), std::greater<int>());
+#endif
+        qCDebug(logGrandSearch) << "Removed" << rowList.size() << "paths from blacklist";
         for (auto index : rowList) {
             m_listWrapper->removeRows(index, 1);
         }

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -6,9 +6,13 @@
 #include "grandsearchlistmodel.h"
 #include "grandsearchlistdelegate.h"
 #include "utils/utils.h"
+#include "utils/highlightprovider.h"
 #include "global/matcheditem.h"
 #include "global/builtinsearch.h"
 #include "global/accessibility/acintelfunctions.h"
+#include "thumbnail/thumbnail.h"
+
+#include <dfm-search/dsearch_global.h>
 
 #include <DGuiApplicationHelper>
 #include <DStandardPaths>
@@ -24,7 +28,6 @@ DGUI_USE_NAMESPACE
 DWIDGET_USE_NAMESPACE
 
 #define ICON_SIZE 24
-#define ListItemTextMaxWidth      240      // 文本元素最大显示宽度
 
 GrandSearchListView::GrandSearchListView(QWidget *parent)
     : DListView(parent)
@@ -34,7 +37,8 @@ GrandSearchListView::GrandSearchListView(QWidget *parent)
     m_delegate = new GrandSearchListDelegate(this);
     setItemDelegate(m_delegate);
     setViewportMargins(0, 0, 0, 0);
-    setUniformItemSizes(true);
+    setUniformItemSizes(false);
+    setIconSize({ ICON_SIZE, ICON_SIZE });
 
     setViewMode(QListView::ListMode);
     setResizeMode(QListView::Adjust);
@@ -48,11 +52,19 @@ GrandSearchListView::GrandSearchListView(QWidget *parent)
     connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, &GrandSearchListView::onSetThemeType);
 
     m_themeType = DGuiApplicationHelper::instance()->themeType();
+
+    // 初始化缩略图模块
+    initThumbnailModule();
+
+    // 连接缩略图生成完成信号
+    connect(ThumbnailProvider::instance(), &ThumbnailProvider::thumbnailReady,
+            this, &GrandSearchListView::onThumbnailReady);
 }
 
 GrandSearchListView::~GrandSearchListView()
 {
-
+    // 主动释放缩略图任务管理器资源
+    ThumbnailTaskManager::instance()->shutdown();
 }
 
 void GrandSearchListView::setMatchedItems(const MatchedItems &items)
@@ -120,7 +132,7 @@ void GrandSearchListView::insertRows(int nRow, const MatchedItems &items)
     }
 
     for (int i = 0; i < items.size(); i++) {
-        insertRow(nRow,items[i]);
+        insertRow(nRow, items[i]);
     }
 }
 
@@ -157,8 +169,19 @@ int GrandSearchListView::getThemeType() const
 
 void GrandSearchListView::clear()
 {
+    if (m_delegate)
+        m_delegate->clearTooltipCache();
     if (m_model)
         m_model->clear();
+}
+
+void GrandSearchListView::setSearchKeyword(const QString &keyword)
+{
+    // 关键词改变时，丢弃所有旧的高亮任务
+    if (!m_currentKeyword.isEmpty()) {
+        HighlightProvider::instance()->cancelTask(m_currentKeyword);
+    }
+    m_currentKeyword = keyword;
 }
 
 void GrandSearchListView::updatePreviewItemState(const bool preview)
@@ -214,13 +237,22 @@ void GrandSearchListView::mousePressEvent(QMouseEvent *event)
     DListView::mousePressEvent(event);
 }
 
+void GrandSearchListView::onThumbnailReady(const QString &filePath, const QPixmap &thumbnail)
+{
+    if (thumbnail.isNull()) {
+        return;
+    }
+
+    updateThumbnail(filePath, thumbnail);
+}
+
 QString GrandSearchListView::cacheDir()
 {
     auto userCachePath = DStandardPaths::standardLocations(QStandardPaths::CacheLocation).value(0);
     return userCachePath;
 }
 
-void GrandSearchListView::setData(const QModelIndex& index, const MatchedItem &item)
+void GrandSearchListView::setData(const QModelIndex &index, const MatchedItem &item)
 {
     if (!index.isValid())
         return;
@@ -229,37 +261,42 @@ void GrandSearchListView::setData(const QModelIndex& index, const MatchedItem &i
     searchMeta.setValue(item);
     m_model->setData(index, searchMeta, DATA_ROLE);
 
-    // 添加悬浮提示
-    QFontMetricsF fontWidth(DFontSizeManager::instance()->get(DFontSizeManager::T6));
-    QString mtext = fontWidth.elidedText(item.name, Qt::ElideRight, ListItemTextMaxWidth);
-    if (mtext != item.name) {
-        m_model->setData(index, item.name, Qt::ToolTipRole);
-    }
-
-    // 设置icon
-    QVariant iconVariantData;
+    // 设置icon - 先显示默认图标
+    QIcon itemIcon = Utils::defaultIcon(item);
     const QString &strIcon = item.icon;
-    if (!strIcon.isEmpty()) {
-        const int size = static_cast<int>(ICON_SIZE);
-        const QSize iconSize(size, size);
 
+    if (!strIcon.isEmpty()) {
         // 判断icon是路径还是图标名
         if (strIcon.contains('/')) {
             QFileInfo file(strIcon);
             if (file.exists())
-                iconVariantData.setValue(QIcon(strIcon).pixmap(iconSize));
-            else
-                iconVariantData.setValue(Utils::defaultIcon(item).pixmap(iconSize));
+                itemIcon = QIcon(strIcon);
         } else {
             QIcon icon = QIcon::fromTheme(strIcon);
-            if (icon.isNull())
-                iconVariantData.setValue(Utils::defaultIcon(item).pixmap(iconSize));
-            else
-                iconVariantData.setValue(icon.pixmap(iconSize));
+            if (!icon.isNull())
+                itemIcon = icon;
         }
     }
 
-    m_model->setData(index,iconVariantData, Qt::DecorationRole);
+    if (itemIcon.isNull())
+        itemIcon = QIcon::fromTheme("unknown");
+    m_model->setData(index, itemIcon, Qt::DecorationRole);
+
+    // 异步请求缩略图
+    if (!item.item.isEmpty()) {
+        QString mimetype = item.type;
+        if (mimetype.isEmpty()) {
+            mimetype = Utils::getFileMimetype(item.item);
+        }
+
+        // 检查是否支持该类型的缩略图
+        if (ThumbnailProvider::instance()->isSupported(mimetype)) {
+            ThumbnailProvider::instance()->requestThumbnail(item.item, mimetype, GrandSearch::ThumbnailSize::Large);
+        }
+
+        // 异步请求高亮内容（仅对全文搜索和OCR搜索）
+        requestHighlightContent(item, true);
+    }
 }
 
 int GrandSearchListView::levelItemLastRow(const int level)
@@ -274,4 +311,114 @@ int GrandSearchListView::levelItemLastRow(const int level)
     }
 
     return lastRow;
+}
+
+void GrandSearchListView::updateThumbnail(const QString &filePath, const QPixmap &thumbnail)
+{
+    if (filePath.isEmpty() || thumbnail.isNull()) {
+        return;
+    }
+
+    // 遍历所有项，找到匹配的文件路径
+    for (int row = 0; row < m_model->rowCount(); ++row) {
+        QModelIndex index = m_model->index(row, 0);
+        if (!index.isValid()) {
+            continue;
+        }
+
+        // 获取该项的数据
+        QVariant data = m_model->data(index, DATA_ROLE);
+        if (!data.isValid()) {
+            continue;
+        }
+
+        MatchedItem item = data.value<MatchedItem>();
+        if (item.item == filePath) {
+            // 更新缩略图到独立角色，保留原始图标
+            m_model->setData(index, thumbnail, THUMBNAIL_ROLE);
+            break;   // 找到后退出循环
+        }
+    }
+}
+
+void GrandSearchListView::requestHighlightContent(const MatchedItem &item, bool highPriority)
+{
+    // 仅对全文搜索和 OCR 搜索请求高亮内容
+    if (item.searcher != GRANDSEARCH_CLASS_FILE_FULLTEXT
+        && item.searcher != GRANDSEARCH_CLASS_OCR_TEXT) {
+        return;
+    }
+
+    if (m_currentKeyword.isEmpty() || item.item.isEmpty()) {
+        return;
+    }
+
+    QVariantHash extraHash = item.extra.toHash();
+
+    // 如果已经有 matchedContext，不需要再请求
+    if (extraHash.contains(GRANDSEARCH_PROPERTY_ITEM_MATCHEDCONTEXT)
+        && !extraHash.value(GRANDSEARCH_PROPERTY_ITEM_MATCHEDCONTEXT).toString().isEmpty()) {
+        return;
+    }
+
+    // 从 item.extra 中获取实际搜索关键词（daemon 可能对用户输入做了转换/扩展）
+    QStringList keywords = extraHash.value(GRANDSEARCH_PROPERTY_ITEM_KEYWORDS, QStringList()).toStringList();
+    if (keywords.isEmpty()) {
+        return;
+    }
+
+    // 根据 searcher 类型确定 searchType
+    int searchType = 0;
+    if (item.searcher == GRANDSEARCH_CLASS_FILE_FULLTEXT) {
+        searchType = static_cast<int>(DFMSEARCH::SearchType::Content);
+    } else if (item.searcher == GRANDSEARCH_CLASS_OCR_TEXT) {
+        searchType = static_cast<int>(DFMSEARCH::SearchType::Ocr);
+    }
+
+    // 将关键词列表用空格连接为单个字符串，传给 fetchHighlight
+    HighlightProvider::instance()->requestHighlight(
+        m_currentKeyword, item.item, keywords.first(), searchType, highPriority);
+}
+
+void GrandSearchListView::onHighlightReady(const QString &keyword, const QString &filePath, const QString &content)
+{
+    Q_UNUSED(keyword)
+    if (content.isEmpty()) {
+        return;
+    }
+
+    updateHighlight(filePath, content);
+}
+
+void GrandSearchListView::updateHighlight(const QString &filePath, const QString &content)
+{
+    if (filePath.isEmpty() || content.isEmpty()) {
+        return;
+    }
+
+    // 遍历所有项，找到匹配的文件路径
+    for (int row = 0; row < m_model->rowCount(); ++row) {
+        QModelIndex index = m_model->index(row, 0);
+        if (!index.isValid()) {
+            continue;
+        }
+
+        QVariant data = m_model->data(index, DATA_ROLE);
+        if (!data.isValid()) {
+            continue;
+        }
+
+        MatchedItem item = data.value<MatchedItem>();
+        if (item.item == filePath) {
+            // 更新 extra hash 中的 matchedContext
+            QVariantHash extraHash = item.extra.toHash();
+            extraHash.insert(GRANDSEARCH_PROPERTY_ITEM_MATCHEDCONTEXT, content);
+            item.extra = extraHash;
+
+            QVariant searchMeta;
+            searchMeta.setValue(item);
+            m_model->setData(index, searchMeta, DATA_ROLE);
+            break;
+        }
+    }
 }

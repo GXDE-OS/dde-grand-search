@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -38,6 +38,12 @@ public:
     void setSearchGroupName(const QString &searchGroupName);
     QString searchGroupName() const;
 
+    /**
+     * @brief 设置当前搜索关键词，传播到列表视图以管理高亮任务
+     * @param keyword 搜索关键词
+     */
+    void setSearchKeyword(const QString &keyword);
+
     void setGroupName(const QString &groupName);
     QString groupName() const;
 
@@ -56,6 +62,9 @@ public:
 
     static QString convertDisplayName(const QString &searchGroupName);
 
+    MatchedItem findItemByPath(const QString &path) const;
+    bool updateItemByPath(const QString &path, const MatchedItem &newItem);
+
 public slots:
     virtual void onMoreBtnClicked();
 
@@ -66,6 +75,7 @@ private:
     void initUi();
     void initConnect();
     void updateShowItems(MatchedItems &items);
+    void deduplicateByPath(MatchedItems &newItems);
     void onOpenConfig(const QString& link);
 
 signals:

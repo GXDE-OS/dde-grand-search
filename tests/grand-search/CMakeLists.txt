@@ -1,7 +1,7 @@
 # 定义需要的cmake版本
 cmake_minimum_required(VERSION 3.10)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -33,10 +33,10 @@ add_definitions(-DPLUGIN_PREVIEW_DIR="${PLUGIN_PREVIEW_DIR}")
 
 # 依赖包
 find_package(PkgConfig REQUIRED)
-find_package(DtkWidget REQUIRED)
-find_package(DtkGui REQUIRED)
-find_package(DtkCMake REQUIRED)
-find_package(Qt5 COMPONENTS
+find_package(${DTK_WIDGET_PKG} REQUIRED)
+find_package(${DTK_GUI_PKG} REQUIRED)
+find_package(${DTK_CMAKE_PKG} REQUIRED)
+find_package(${QT_NS} COMPONENTS
     Core
     Gui
     Widgets
@@ -48,14 +48,13 @@ pkg_check_modules(GIO_LIB REQUIRED
         gio-unix-2.0
         glib-2.0
 )
-pkg_check_modules(DFrameworkDBus REQUIRED dframeworkdbus)
 
 set(Qt_LIBS
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Widgets
-    Qt5::DBus
-    Qt5::Concurrent
+    ${QT_NS}::Core
+    ${QT_NS}::Gui
+    ${QT_NS}::Widgets
+    ${QT_NS}::DBus
+    ${QT_NS}::Concurrent
 )
 
 set(PROJECT_SRC_PATH "${PROJECT_SOURCE_PATH}/grand-search")
@@ -82,8 +81,10 @@ target_include_directories(${BIN_NAME} PUBLIC
     ${CMAKE_SOURCE_DIR}/include
     ${DtkWidget_INCLUDE_DIRS}
     ${DtkGUI_INCLUDE_DIRS}
-    ${DFrameworkDBus_INCLUDE_DIRS}
     ${GIO_LIB_INCLUDE_DIRS}
+    /usr/include/dfm6-search
+    # Stub headers take priority over system dfm-search headers
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_link_libraries(${BIN_NAME} PRIVATE
@@ -91,9 +92,8 @@ target_link_libraries(${BIN_NAME} PRIVATE
     ${DtkWidget_LIBRARIES}
     ${DtkGUI_LIBRARIES}
     ${GTEST_LIBRARIES}
-    ${Qt5Test_LIBRARIES}
+    ${QT_NS}::Test
     ${GIO_LIB_LIBRARIES}
-    ${DFrameworkDBus_LIBRARIES}
     -lpthread
 )
 

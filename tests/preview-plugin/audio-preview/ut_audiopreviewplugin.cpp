@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -33,7 +33,8 @@ TEST(AudioPreviewPluginTest, ut_previewItem)
         return data;
     });
     st.set_lamda(&AudioView::setItemInfo, [](){ return; });
-    st.set_lamda(&QFileInfo::lastModified, [](){
+    auto lastModFunc = (QDateTime (QFileInfo::*)() const)&QFileInfo::lastModified;
+    st.set_lamda(lastModFunc, [](){
         return QDateTime::currentDateTime();
     });
     st.set_lamda(&QFileInfo::absoluteFilePath, [](){ return "/home"; });

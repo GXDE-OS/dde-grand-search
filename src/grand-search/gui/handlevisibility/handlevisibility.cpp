@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -8,6 +8,10 @@
 #include <DApplication>
 
 #include <QtDebug>
+#include <QTimer>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(logGrandSearch)
 
 #define SessionManagerService "org.deepin.dde.SessionManager1"
 #define SessionManagerPath "/org/deepin/dde/SessionManager1"
@@ -16,15 +20,19 @@ using namespace GrandSearch;
 DWIDGET_USE_NAMESPACE
 
 HandleVisibility::HandleVisibility(MainWindow *mainWindow, QObject *parent)
-    : QObject(parent)
-    , m_mainWindow(mainWindow)
-    // , m_sessionManagerInter(new com::deepin::SessionManager(SessionManagerService, SessionManagerPath, QDBusConnection::sessionBus(), this))
+    : QObject(parent),
+      m_mainWindow(mainWindow)
+// , m_sessionManagerInter(new com::deepin::SessionManager(SessionManagerService, SessionManagerPath, QDBusConnection::sessionBus(), this))
 {
+    qCDebug(logGrandSearch) << "Creating HandleVisibility";
     init();
+    qCDebug(logGrandSearch) << "HandleVisibility created successfully";
 }
 
 void HandleVisibility::init()
 {
+    qCDebug(logGrandSearch) << "Initializing visibility handler";
+
     m_regionMonitor = new DRegionMonitor(this);
     m_regionMonitor->setCoordinateType(DRegionMonitor::ScaleRatio);
     // 鼠标点击主界面之外的区域，退出进程
@@ -45,10 +53,10 @@ void HandleVisibility::onApplicationStateChanged(const Qt::ApplicationState stat
 
     if (Qt::ApplicationInactive == state) {
         // todo 二阶段：截图导致本进程窗口变为非激活，不退出。截图退出后，主动激活本进程主窗口。
-        qDebug() << "application state change to inactive,so i will exit.";
+        qCInfo(logGrandSearch) << "Application state changed to inactive - Closing main window";
         m_mainWindow->close();
     } else if (Qt::ApplicationActive == state) {
-        qDebug() << "application state change to active.";
+        qCDebug(logGrandSearch) << "Application state changed to active - Showing main window";
         m_mainWindow->show();
     }
 }
@@ -57,6 +65,8 @@ void HandleVisibility::onLockedChanged(const bool locked)
 {
     Q_ASSERT(m_mainWindow);
 
+    qCDebug(logGrandSearch) << "Screen lock state changed - Locked:" << locked
+                            << "Setting window visible:" << !locked;
     m_mainWindow->setVisible(!locked);
 }
 
@@ -64,6 +74,7 @@ void HandleVisibility::onCloseWindow()
 {
     Q_ASSERT(m_mainWindow);
 
+    qCDebug(logGrandSearch) << "Closing main window";
     m_mainWindow->close();
 }
 
@@ -73,6 +84,8 @@ void HandleVisibility::registerRegion(const bool isRegister)
 
     if (isRegister == m_regionMonitor->registered())
         return;
+
+    qCDebug(logGrandSearch) << "Region registration:" << isRegister;
     // FIXME: how to fix blocked 25s issue on treeland
     /*
     if (isRegister)
@@ -92,7 +105,9 @@ void HandleVisibility::regionMousePress(const QPoint &p, const int flag)
         }
     }
     // 点击位置在程序窗口之外则退出
-    qDebug() << "click:" << p << "   flag:" << flag << "    and exit.";
+    qCInfo(logGrandSearch) << "Mouse click outside application window - Position:" << p
+                           << "Flag:" << flag
+                           << "Scheduling window close";
     // todo ：后期根据情况，可能需要设置为隐藏，而不能直接退出
     // 延迟退出，便于dock插件响应时能正确获取当前状态
     QTimer::singleShot(500, this, &HandleVisibility::onCloseWindow);

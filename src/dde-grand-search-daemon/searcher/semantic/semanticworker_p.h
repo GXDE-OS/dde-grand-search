@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -35,7 +35,7 @@ public:
     MatchedItemMap m_items;
 
     //计时
-    QTime m_time;
+    QElapsedTimer m_time;
     int m_lastEmit = 0;
 
     bool m_doSemantic = false;

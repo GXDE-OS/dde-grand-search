@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -7,10 +7,15 @@
 #include "listview/grandsearchlistview.h"
 #include "viewmore/viewmorebutton.h"
 #include "utils/utils.h"
+#include "utils/highlightprovider.h"
 #include "gui/datadefine.h"
 
 #include <DScrollArea>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <DGuiApplicationHelper>
+#else
 #include <DApplicationHelper>
+#endif
 
 #include <QDebug>
 #include <QVBoxLayout>
@@ -18,6 +23,9 @@
 #include <QPaintEvent>
 #include <QPalette>
 #include <QScrollBar>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(logGrandSearch)
 
 DWIDGET_USE_NAMESPACE
 using namespace GrandSearch;
@@ -28,7 +36,6 @@ using namespace GrandSearch;
 MatchWidgetPrivate::MatchWidgetPrivate(MatchWidget *parent)
     : q_p(parent)
 {
-
 }
 
 void MatchWidgetPrivate::setGroupIcon(GroupWidget *wid)
@@ -42,14 +49,14 @@ void MatchWidgetPrivate::setGroupIcon(GroupWidget *wid)
 }
 
 MatchWidget::MatchWidget(QWidget *parent)
-    : DWidget(parent)
-    , d_p(new MatchWidgetPrivate(this))
+    : DWidget(parent), d_p(new MatchWidgetPrivate(this))
 {
     m_groupHashShowOrder << GRANDSEARCH_GROUP_BEST << GRANDSEARCH_GROUP_FILE_INFERENCE
                          << GRANDSEARCH_GROUP_APP << GRANDSEARCH_GROUP_SETTING
                          << GRANDSEARCH_GROUP_WEB << GRANDSEARCH_GROUP_FILE_VIDEO
-                         << GRANDSEARCH_GROUP_FILE_AUDIO << GRANDSEARCH_GROUP_FILE_PICTURE
-                         << GRANDSEARCH_GROUP_FILE_DOCUMNET << GRANDSEARCH_GROUP_FOLDER << GRANDSEARCH_GROUP_FILE;
+                         << GRANDSEARCH_GROUP_FILE_AUDIO << GRANDSEARCH_GROUP_FILE_OCR
+                         << GRANDSEARCH_GROUP_FILE_PICTURE << GRANDSEARCH_GROUP_FILE_DOCUMNET
+                         << GRANDSEARCH_GROUP_FOLDER << GRANDSEARCH_GROUP_FILE;
     initUi();
     initConnect();
 
@@ -58,18 +65,19 @@ MatchWidget::MatchWidget(QWidget *parent)
 
 MatchWidget::~MatchWidget()
 {
-
 }
 
 void MatchWidget::appendMatchedData(const MatchedItemMap &matchedData)
 {
+    qCDebug(logGrandSearch) << "MatchWidget appending data - Groups:" << matchedData.size();
+
     bool bNeedRelayout = false;
 
     // 数据处理
     MatchedItemMap::ConstIterator itData = matchedData.begin();
     while (itData != matchedData.end()) {
         // 根据groupHash创建对应类目列表，若已存在，直接返回已有类目列表
-        GroupWidget* groupWidget = createGroupWidget(itData.key());
+        GroupWidget *groupWidget = createGroupWidget(itData.key());
         if (!groupWidget) {
             itData++;
             continue;
@@ -84,14 +92,17 @@ void MatchWidget::appendMatchedData(const MatchedItemMap &matchedData)
         }
 
         // 追加匹配数据到类目列表中
-        groupWidget->appendMatchedItems(itData.value(), itData.key());
+        MatchedItems filteredItems = itData.value();
+        if (groupWidget->searchGroupName() != GRANDSEARCH_GROUP_BEST)
+            filteredItems = deduplicateAgainstBestMatch(filteredItems, itData.key());
+        groupWidget->appendMatchedItems(filteredItems, itData.key());
 
         // 列表中没有数据，显示等待效果
         groupWidget->setVisible(true);
         groupWidget->showSpinner(groupWidget->itemCount() < 1);
 
         // 有新增匹配结果，需要调整重新布局
-        if (!bNeedRelayout && itData.value().size() > 0)
+        if (!bNeedRelayout && filteredItems.size() > 0)
             bNeedRelayout = true;
 
         itData++;
@@ -101,8 +112,10 @@ void MatchWidget::appendMatchedData(const MatchedItemMap &matchedData)
     sortVislibleGroupList();
 
     // 重新调整布局
-    if (bNeedRelayout)
+    if (bNeedRelayout) {
+        qCDebug(logGrandSearch) << "Relayouting match widget";
         reLayout();
+    }
 
     // 用户未手动切换选中项时，确保选中当前结果中的第一个
     if (!m_customSelected) {
@@ -114,6 +127,8 @@ void MatchWidget::appendMatchedData(const MatchedItemMap &matchedData)
 void MatchWidget::clearMatchedData()
 {
     Q_ASSERT(m_scrollAreaContent);
+
+    qCDebug(logGrandSearch) << "Clearing match widget data";
 
     m_vGroupWidgets.clear();
 
@@ -132,8 +147,23 @@ void MatchWidget::clearMatchedData()
     m_customSelected = false;
 }
 
+void MatchWidget::setSearchKeyword(const QString &keyword)
+{
+    // 缓存当前搜索关键词，新建分组时同步设置
+    m_currentKeyword = keyword;
+
+    // 同时传播到已存在的分组
+    for (GroupWidget *groupWidget : std::as_const(m_groupWidgetMap)) {
+        if (groupWidget) {
+            groupWidget->setSearchKeyword(keyword);
+        }
+    }
+}
+
 void MatchWidget::onSearchCompleted()
 {
+    qCDebug(logGrandSearch) << "Match widget search completed";
+
     // 搜索结束关闭等待动画
     bool need = false;
     for (GroupWidget *wid : m_groupWidgetMap.values()) {
@@ -152,6 +182,7 @@ void MatchWidget::onSearchCompleted()
     if (!m_vGroupWidgets.isEmpty())
         return;
 
+    qCDebug(logGrandSearch) << "No content to show";
     emit sigShowNoContent(true);
 }
 
@@ -199,11 +230,11 @@ void MatchWidget::selectNextItem()
                     listView->setCurrentIndex(QModelIndex());
                     m_customSelected = true;
                 } else {
-                    qDebug() << "select next failed";
+                    qCWarning(logGrandSearch) << "Failed to select next item in group:" << group->searchGroupName();
                 }
                 break;
             } else {
-                qInfo() << "it's the last one";
+                qCInfo(logGrandSearch) << "Reached last item in search results";
             }
         }
     }
@@ -250,11 +281,11 @@ void MatchWidget::selectPreviousItem()
                     viewMoreBtn->setSelected(false);
                     m_customSelected = true;
                 } else {
-                    qWarning() << "select previous failed";
+                    qCWarning(logGrandSearch) << "Failed to select previous item in group:" << group->searchGroupName();
                 }
                 break;
             } else {
-                qInfo() << "it's the first one";
+                qCInfo(logGrandSearch) << "Reached first item in search results";
             }
         }
     }
@@ -264,6 +295,8 @@ void MatchWidget::selectPreviousItem()
 
 void MatchWidget::handleItem()
 {
+    qCDebug(logGrandSearch) << "Handling selected item";
+
     for (int i = 0; i < m_vGroupWidgets.count(); ++i) {
         if (hasSelectItem(i)) {
             ViewMoreButton *viewMoreBtn = m_vGroupWidgets.at(i)->getViewMoreButton();
@@ -277,6 +310,7 @@ void MatchWidget::handleItem()
             }
 
             MatchedItem item = listView->currentIndex().data(DATA_ROLE).value<MatchedItem>();
+            qCDebug(logGrandSearch) << "Opening matched item:" << item.name;
             Utils::openMatchedItem(item);
             emit sigCloseWindow();
             break;
@@ -287,7 +321,7 @@ void MatchWidget::handleItem()
 void MatchWidget::onPreviewStateChanged(const bool preview)
 {
     if (this->isHidden() || preview == m_isPreviewItem)
-        return ;
+        return;
 
     m_isPreviewItem = preview;
 
@@ -308,7 +342,7 @@ void MatchWidget::onSelectItemByMouse(const MatchedItem &item)
     QString searchGroupName;
 
     // 通知其他列表取消选中
-    GrandSearchListView* listView = qobject_cast<GrandSearchListView*>(sender());
+    GrandSearchListView *listView = qobject_cast<GrandSearchListView *>(sender());
     if (listView) {
         for (int i = 0; i < m_vGroupWidgets.count(); ++i) {
             if (hasSelectItem(i)) {
@@ -449,7 +483,7 @@ void MatchWidget::adjustScrollBar()
 {
     int nCurSelHeight = 0;
 
-    //计算当前选中Item在contentWidget整体高度位置
+    // 计算当前选中Item在contentWidget整体高度位置
     for (auto group : m_vGroupWidgets) {
         if (Q_UNLIKELY((!group)))
             continue;
@@ -458,7 +492,7 @@ void MatchWidget::adjustScrollBar()
         if (Q_UNLIKELY(!viewMoreBtn))
             continue;
 
-        GrandSearchListView* listView = group->getListView();
+        GrandSearchListView *listView = group->getListView();
         if (Q_UNLIKELY(!listView))
             continue;
 
@@ -470,12 +504,12 @@ void MatchWidget::adjustScrollBar()
         }
     }
 
-    int nScrollAreaHeight = m_scrollArea->height();// 滚动区域高度
-    int nCurPosValue = m_scrollArea->verticalScrollBar()->value();//滚动条当前位置
-    int nCurHeight = nScrollAreaHeight + nCurPosValue;//滚动条当前可显示的内容高度
+    int nScrollAreaHeight = m_scrollArea->height();   // 滚动区域高度
+    int nCurPosValue = m_scrollArea->verticalScrollBar()->value();   // 滚动条当前位置
+    int nCurHeight = nScrollAreaHeight + nCurPosValue;   // 滚动条当前可显示的内容高度
 
-    int nOffset = 0;// 记录需要滚动的偏移量
-    int nNewPosValue = 0;// 滚动条位置新值
+    int nOffset = 0;   // 记录需要滚动的偏移量
+    int nNewPosValue = 0;   // 滚动条位置新值
 
     // 选中行定位到当前滚动区域底部，逐个向下滚动
     if (nCurSelHeight > nCurHeight) {
@@ -492,9 +526,9 @@ void MatchWidget::adjustScrollBar()
         m_scrollArea->verticalScrollBar()->setValue(nNewPosValue);
     }
 
-//    int nMin = m_scrollArea->verticalScrollBar()->minimum();
-//    int nMax = m_scrollArea->verticalScrollBar()->maximum();
-//    qDebug() << QString("nMin:%1 nMax:%2 nCurSelHeight%3 nCurPosValue:%4 nNewPosValue:%5").arg(nMin).arg(nMax).arg(nCurSelHeight).arg(nCurPosValue).arg(nNewPosValue);
+    //    int nMin = m_scrollArea->verticalScrollBar()->minimum();
+    //    int nMax = m_scrollArea->verticalScrollBar()->maximum();
+    //    qDebug() << QString("nMin:%1 nMax:%2 nCurSelHeight%3 nCurPosValue:%4 nNewPosValue:%5").arg(nMin).arg(nMax).arg(nCurSelHeight).arg(nCurPosValue).arg(nNewPosValue);
 }
 
 void MatchWidget::currentIndexChanged(const QString &searchGroupName, const QModelIndex &index)
@@ -520,7 +554,11 @@ void MatchWidget::initUi()
     m_scrollArea->setWidget(m_scrollAreaContent);
 
     QPalette palette = m_scrollArea->palette();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    palette.setColor(QPalette::Window, Qt::transparent);
+#else
     palette.setColor(QPalette::Background, Qt::transparent);
+#endif
     m_scrollArea->setPalette(palette);
     m_scrollArea->setLineWidth(0);
 
@@ -529,14 +567,24 @@ void MatchWidget::initUi()
     m_vScrollLayout = new QVBoxLayout(m_scrollAreaContent);
     m_vScrollLayout->setContentsMargins(0, 0, 0, 0);
     m_vScrollLayout->setSpacing(0);
-
 }
 
 void MatchWidget::initConnect()
 {
-
+    // 统一连接高亮信号，路由到所有包含该文件路径的 GroupWidget -> ListView
+    // 同一文件可能存在于多个分组（如文档分组和文件分组），需要全部更新
+    connect(HighlightProvider::instance(), &HighlightProvider::highlightReady,
+            this, [this](const QString &keyword, const QString &filePath, const QString &content) {
+        Q_UNUSED(keyword)
+        if (content.isEmpty())
+            return;
+        for (GroupWidget *groupWidget : std::as_const(m_groupWidgetMap)) {
+            if (groupWidget && groupWidget->findItemByPath(filePath).item == filePath) {
+                groupWidget->getListView()->onHighlightReady(keyword, filePath, content);
+            }
+        }
+    });
 }
-
 
 void MatchWidget::reLayout()
 {
@@ -608,6 +656,11 @@ GroupWidget *MatchWidget::createGroupWidget(const QString &searchGroupName)
         groupWidget->setSearchGroupName(searchGroupName);
         d_p->setGroupIcon(groupWidget);
 
+        // 同步当前搜索关键词到新建的分组（setSearchKeyword 可能先于分组创建）
+        if (!m_currentKeyword.isEmpty()) {
+            groupWidget->setSearchKeyword(m_currentKeyword);
+        }
+
         const QString &groupName = GroupWidget::convertDisplayName(searchGroupName);
         groupWidget->setGroupName(groupName);
         m_groupWidgetMap[searchGroupName] = groupWidget;
@@ -630,8 +683,8 @@ void MatchWidget::sortVislibleGroupList()
     while (itemWidget != m_groupWidgetMap.end()) {
 
         if (itemWidget.value()
-                && !itemWidget.value()->isHidden()
-                && !m_vGroupWidgets.contains(itemWidget.value()))
+            && !itemWidget.value()->isHidden()
+            && !m_vGroupWidgets.contains(itemWidget.value()))
             m_vGroupWidgets.push_back(itemWidget.value());
 
         itemWidget++;
@@ -646,11 +699,46 @@ void MatchWidget::paintEvent(QPaintEvent *event)
 void MatchWidget::resizeEvent(QResizeEvent *event)
 {
     // 重写resizeEvent，手动设置类目列表宽度，保证匹配列表布局正常显示
-    for (GroupWidgetMap::Iterator it = m_groupWidgetMap.begin(); it !=m_groupWidgetMap.end(); ++it) {
+    for (GroupWidgetMap::Iterator it = m_groupWidgetMap.begin(); it != m_groupWidgetMap.end(); ++it) {
         if (it.value()) {
-            it.value()->setFixedWidth(rect().width() - ScrollBarToListRightSpace);// 滚动条与列表右侧需要有2px间隙
+            it.value()->setFixedWidth(rect().width() - ScrollBarToListRightSpace);   // 滚动条与列表右侧需要有2px间隙
         }
     }
 
     DWidget::resizeEvent(event);
+}
+
+MatchedItems MatchWidget::deduplicateAgainstBestMatch(const MatchedItems &items, const QString &groupName)
+{
+    // Groups in blackGroup always display their items regardless of Best Match
+    static const QSet<QString> blackGroup = {
+        GRANDSEARCH_GROUP_FILE_VIDEO,
+        GRANDSEARCH_GROUP_FILE_AUDIO,
+        GRANDSEARCH_GROUP_FILE_PICTURE,
+        GRANDSEARCH_GROUP_FILE_DOCUMNET,
+        GRANDSEARCH_GROUP_FOLDER
+    };
+    if (blackGroup.contains(groupName))
+        return items;
+
+    GroupWidget *bestMatchWidget = m_groupWidgetMap.value(GRANDSEARCH_GROUP_BEST);
+    if (!bestMatchWidget || bestMatchWidget->itemCount() == 0)
+        return items;
+
+    MatchedItems filtered;
+    for (const auto &item : items) {
+        MatchedItem existing = bestMatchWidget->findItemByPath(item.item);
+        if (!existing.item.isEmpty()) {
+            // Already in Best Match — update if new item has higher weight
+            double newWeight = item.extra.toHash().value(GRANDSEARCH_PROPERTY_ITEM_WEIGHT, 0).toDouble();
+            double existingWeight = existing.extra.toHash().value(GRANDSEARCH_PROPERTY_ITEM_WEIGHT, 0).toDouble();
+            if (newWeight > existingWeight) {
+                bestMatchWidget->updateItemByPath(item.item, item);
+            }
+            // Don't add to current group — item belongs to Best Match
+            continue;
+        }
+        filtered << item;
+    }
+    return filtered;
 }

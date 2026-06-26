@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -18,6 +18,9 @@
 #include <QDir>
 #include <QSettings>
 #include <QVBoxLayout>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(logGrandSearch)
 
 DWIDGET_USE_NAMESPACE
 using namespace GrandSearch;
@@ -25,6 +28,8 @@ using namespace GrandSearch;
 ScopeWidget::ScopeWidget(QWidget *parent)
     : DWidget(parent)
 {
+    qCDebug(logGrandSearch) << "Creating ScopeWidget";
+
     m_groupLabel = new QLabel(tr("Search contents"), this);
     DFontSizeManager::instance()->bind(m_groupLabel, DFontSizeManager::T5, QFont::Bold);
 
@@ -82,6 +87,8 @@ ScopeWidget::ScopeWidget(QWidget *parent)
     updateIcons();
 
     connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, &ScopeWidget::updateIcons);
+
+    qCDebug(logGrandSearch) << "ScopeWidget created with" << m_switchWidgets.size() << "search groups";
 }
 
 ScopeWidget::~ScopeWidget()
@@ -96,6 +103,8 @@ void ScopeWidget::onSwitchStateChanged(const bool checked)
 
     if (switchWidget) {
         QString group = switchWidget->property(GRANDSEARCH_SEARCH_GROUP).toString();
+        qCDebug(logGrandSearch) << "Search group configuration changed - Group:" << group
+                                << "Enabled:" << checked;
         SearchConfig::instance()->setConfig(GRANDSEARCH_SEARCH_GROUP, group, checked);
     }
 }
@@ -104,17 +113,15 @@ void ScopeWidget::updateIcons()
 {
     Q_ASSERT(m_switchWidgets.count() == m_displayIcons.count());
 
-    QString suffix = Utils::iconThemeSuffix();
-
     for (int i = 0; i < m_switchWidgets.count(); ++i) {
 
         QString iconName = m_displayIcons.at(i);
-        QIcon icon = QIcon(QString(":/icons/%1%2.svg").arg(iconName).arg(suffix));
+        const auto &icon = QIcon::fromTheme(iconName);
 
         auto switchWidget = m_switchWidgets.at(i);
         Q_ASSERT(switchWidget);
 
-        switchWidget->setIcon(icon, QSize(SWITCHWIDGETICONSIZE, SWITCHWIDGETICONSIZE));
+        switchWidget->setIcon(icon, { SWITCHWIDGETICONSIZE, SWITCHWIDGETICONSIZE });
     }
     update();
 }

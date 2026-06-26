@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -32,6 +32,8 @@ typedef QList<DetailInfo> DetailInfoList;
 #define PREVIEW_ITEMINFO_ICON "icon"
 #define PREVIEW_ITEMINFO_TYPE "type"
 #define PREVIEW_ITEMINFO_SEARCHER "searcher"
+#define PREVIEW_ITEMINFO_MATCHEDCONTEXT "matchedContext"
+#define PREVIEW_ITEMINFO_KEYWORDS "keywords"
 typedef QHash<QString, QString> ItemInfo;
 
 class PreviewPlugin

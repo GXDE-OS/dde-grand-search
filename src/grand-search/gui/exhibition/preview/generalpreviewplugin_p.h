@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -20,14 +20,9 @@ DWIDGET_BEGIN_NAMESPACE
 class DHorizontalLine;
 DWIDGET_END_NAMESPACE
 
-namespace GrandSearch {
+class HighlightLabel;
 
-class NameLabel: public QLabel
-{
-    Q_OBJECT
-public:
-    explicit NameLabel(const QString &text = "", QWidget *parent = nullptr, Qt::WindowFlags f = {});
-};
+namespace GrandSearch {
 
 class SizeLabel: public QLabel
 {
@@ -41,7 +36,7 @@ class GeneralPreviewPluginPrivate
 {
 public:
     explicit GeneralPreviewPluginPrivate(GeneralPreviewPlugin *parent = nullptr);
-    ~GeneralPreviewPluginPrivate();    
+    ~GeneralPreviewPluginPrivate();
 
     GeneralPreviewPlugin *q_p = nullptr;
 
@@ -50,10 +45,12 @@ public:
 
     QVBoxLayout *m_vMainLayout = nullptr;
     QPointer<QWidget> m_contentWidget = nullptr;
+    QObject *m_proxy = nullptr;
 
     // 图标和名称
     QLabel *m_iconLabel = nullptr;
-    NameLabel *m_nameLabel = nullptr;
+    HighlightLabel *m_nameLabel = nullptr;
+    HighlightLabel *m_contentLabel = nullptr;
 
     // 大小
     SizeLabel *m_sizeLabel = nullptr;

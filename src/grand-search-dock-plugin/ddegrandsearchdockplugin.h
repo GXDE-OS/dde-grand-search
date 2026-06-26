@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -92,12 +92,16 @@ public:
 #endif
 
 private slots:
+#if (QT_VERSION_MAJOR < 6)
     void onGsettingsChanged(const QString &key);
+#endif
     void onVisibleChanged(bool visible);
 
 private:
     QScopedPointer<GrandSearchWidget> m_searchWidget;
+#if (QT_VERSION_MAJOR < 6)
     QScopedPointer<QGSettings> m_gsettings;
+#endif
     QScopedPointer<TipsWidget> m_tipsWidget;
     QScopedPointer<QWidget> m_quickWidget;
 

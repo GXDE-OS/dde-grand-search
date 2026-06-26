@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -22,6 +22,9 @@
 #include <QVBoxLayout>
 #include <QScreen>
 #include <QKeyEvent>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(logGrandSearch)
 
 DWIDGET_USE_NAMESPACE
 using namespace GrandSearch;
@@ -33,6 +36,7 @@ static const uint MainWindowExpandHeight    = 520;      // 主界面高度
 MainWindowPrivate::MainWindowPrivate(MainWindow *parent)
     : q_p(parent)
 {
+    qCDebug(logGrandSearch) << "Initializing MainWindow private data";
     m_handleVisibility = new HandleVisibility(q_p, q_p);
 }
 
@@ -40,8 +44,10 @@ MainWindow::MainWindow(QWidget *parent)
     : DBlurEffectWidget(parent)
     , d_p(new MainWindowPrivate(this))
 {
+    qCDebug(logGrandSearch) << "Creating MainWindow";
     initUI();
     initConnect();
+    qCInfo(logGrandSearch) << "MainWindow created successfully";
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
@@ -52,7 +58,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 
 MainWindow::~MainWindow()
 {
-
+    qCDebug(logGrandSearch) << "Destroying MainWindow";
 }
 
 void MainWindow::connectToController()
@@ -61,6 +67,8 @@ void MainWindow::connectToController()
     Q_ASSERT(d_p->m_exhibitionWidget);
     Q_ASSERT(!d_p->m_queryController);
     Q_ASSERT(!d_p->m_matchController);
+
+    qCDebug(logGrandSearch) << "Connecting to controllers";
 
     d_p->m_queryController = new QueryController(this);
     d_p->m_matchController = new MatchController(this);
@@ -78,6 +86,8 @@ void MainWindow::connectToController()
     // 匹配结果解析显示
     connect(d_p->m_matchController, &MatchController::matchedResult, d_p->m_exhibitionWidget, &ExhibitionWidget::appendMatchedData);
     connect(d_p->m_matchController, &MatchController::searchCompleted, d_p->m_exhibitionWidget, &ExhibitionWidget::onSearchCompleted);
+
+    qCInfo(logGrandSearch) << "Controller connections established";
 }
 
 void MainWindow::showExhitionWidget(bool bShow)
@@ -118,6 +128,7 @@ void MainWindow::onFocusObjectChanged(QObject *obj)
 {
     // 焦点回到主窗口时，将焦点设置到输入框中(焦点改变到了预览相关的窗口中则不做处理)
     if (obj && obj == this && d_p->m_entranceWidget) {
+        qCDebug(logGrandSearch) << "Focus returned to main window - Setting focus to entrance widget";
         d_p->m_entranceWidget->setFocus();
     }
 }
@@ -125,6 +136,8 @@ void MainWindow::onFocusObjectChanged(QObject *obj)
 void MainWindow::onPrimaryScreenChanged(const QScreen *screen)
 {
     // 主窗口显示在主屏
+    qCDebug(logGrandSearch) << "Primary screen changed - Geometry:" << screen->geometry()
+                            << "DPI:" << screen->logicalDotsPerInch();
     disconnect(this, SLOT(onGeometryChanged(const QRect &)));
     onGeometryChanged(screen->geometry());
     connect(screen, &QScreen::geometryChanged, this, &MainWindow::onGeometryChanged);
@@ -138,12 +151,15 @@ void MainWindow::onGeometryChanged(const QRect &geometry)
     // 移动窗口到屏幕的居中偏上位置
     sWidth = geometry.x() + sWidth/2 - int(MainWindowWidth/2);
     sHeight = geometry.y() + sHeight/4;
+    qCDebug(logGrandSearch) << "Window geometry changed - Screen:" << geometry
+                            << "Moving window to:" << QPoint(sWidth, sHeight);
     move(sWidth, sHeight);
 }
 
 void MainWindow::onHideExhitionWidget()
 {
     // 搜索文本为空，隐藏展示界面
+    qCDebug(logGrandSearch) << "Hiding exhibition widget - Clearing search results";
     showSerachNoContent(false);
     showExhitionWidget(false);
     showEntranceAppIcon(false);
@@ -159,6 +175,7 @@ void MainWindow::onResetExhitionWidget(const QString &missionId)
     Q_UNUSED(missionId);
 
     // 搜索任务id改变，重置展示界面
+    qCDebug(logGrandSearch) << "Resetting exhibition widget - Mission ID:" << missionId;
     showSerachNoContent(false);
     showExhitionWidget(true);
 
@@ -170,10 +187,15 @@ void MainWindow::onResetExhitionWidget(const QString &missionId)
 
 void MainWindow::onMissionChanged(const QString &missionId, const QString &missionContent)
 {
+    qCDebug(logGrandSearch) << "Mission changed - ID:" << missionId
+                            << "Content length:" << missionContent.length();
     onResetExhitionWidget(missionId);
 
     if (missionContent.isEmpty()) {
         onHideExhitionWidget();
+    } else {
+        // 搜索关键词改变，传播到 ExhibitionWidget 以管理高亮任务
+        d_p->m_exhibitionWidget->setSearchKeyword(missionContent);
     }
 }
 
@@ -187,7 +209,8 @@ void MainWindow::initUI()
         // 在Qt5.11版本、x11环境下，同时设置BypassWindowManagerHint与Tool属性之后，键盘切换大小写将会导致程序的激活状态发生改变。
         setWindowFlags(Qt::BypassWindowManagerHint | Qt::WindowStaysOnTopHint);
     }
-    qDebug() << "current platform name:" << QApplication::platformName() << "   flags:" << this->windowFlags();
+    qCInfo(logGrandSearch) << "Initializing main window - Platform:" << QApplication::platformName()
+                          << "Window flags:" << this->windowFlags();
 
     // 控制界面大小和位置
     setFixedSize(MainWindowWidth, MainWindowHeight);
@@ -217,7 +240,7 @@ void MainWindow::initUI()
 
     // 根据设计图调整主界面布局，限制边距和内容间距为0
     d_p->m_mainLayout->setSpacing(0);
-    d_p->m_mainLayout->setMargin(0);
+    d_p->m_mainLayout->setContentsMargins(0, 0, 0, 0);
 
     this->setLayout(d_p->m_mainLayout);
 
@@ -273,6 +296,7 @@ void MainWindow::updateMainWindowHeight()
 
 void MainWindow::showEvent(QShowEvent *event)
 {
+    qCDebug(logGrandSearch) << "MainWindow show event";
     QMetaObject::invokeMethod(this, "visibleChanged", Qt::QueuedConnection, Q_ARG(bool, true));
 
     // 已禁用窗口管理器，在窗口被显示后，需要激活该窗口
@@ -285,6 +309,7 @@ void MainWindow::showEvent(QShowEvent *event)
 
 void MainWindow::hideEvent(QHideEvent *event)
 {
+    qCDebug(logGrandSearch) << "MainWindow hide event";
     emit visibleChanged(false);
 
     d_p->m_handleVisibility->registerRegion(false);
@@ -294,10 +319,14 @@ void MainWindow::hideEvent(QHideEvent *event)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    qCDebug(logGrandSearch) << "MainWindow close event";
+    emit visibleChanged(false);
     // 通知查询控制器停止搜索
     emit terminateSearch();
     // FIXME: DBlurEffectWidget close abort on treeland
-    qApp->exit(0);
-    _Exit(0);
+    QTimer::singleShot(1, this, [](){
+        qApp->exit(0);
+        _Exit(0);
+    });
     // return DBlurEffectWidget::closeEvent(event);
 }

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -11,14 +11,7 @@
 #include "extend/extendsearcher.h"
 #include "web/statictextechoer.h"
 #include "semantic/semanticsearcher.h"
-
-#ifdef ENABLE_DEEPINANYTHING
-    #include "file/filenamesearcher.h"
-#endif
-
-#ifdef ENABLE_FSEARCH
-    #include "file/fssearcher.h"
-#endif
+#include "file/filenamesearcher.h"
 
 namespace GrandSearch {
 

@@ -2,9 +2,104 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="uk">
 <context>
+    <name>GrandSearch::AiToolBar</name>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="48"/>
+        <source>Unable to use %1, please go to the App Store to update the UOS AI version first.</source>
+        <translation>Неможливо скористатися %1. Будь ласка, спочатку перейдіть до крамниці програм і оновіть версію ШІ UOS.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="49"/>
+        <source>Cancel</source>
+        <translation>Скасувати</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="50"/>
+        <source>Open App Store</source>
+        <translation>Відкрити крамницю програм</translation>
+    </message>
+</context>
+<context>
+    <name>GrandSearch::AiToolBarInner</name>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="112"/>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="162"/>
+        <source>Summary</source>
+        <translation>Резюме</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="113"/>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="163"/>
+        <source>Translation</source>
+        <translation>Переклад</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="114"/>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="164"/>
+        <source>Extension</source>
+        <translation>Розширення</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="115"/>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="165"/>
+        <source>Add to knowledge base</source>
+        <translation>Додати до бази знань</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="126"/>
+        <source>Summarize document content with UOS AI</source>
+        <translation>Підсумувати вміст документа за допомогою ШІ UOS</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="127"/>
+        <source>Translate document content with UOS AI</source>
+        <translation>Перекласти вміст документа за допомогою ШІ UOS</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="128"/>
+        <source>Extend document content with UOS AI</source>
+        <translation>Розширити вміст документа за допомогою ШІ UOS</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="129"/>
+        <source>Add document to UOS AI knowledge base</source>
+        <translation>Додати документ до бази знань ШІ UOS</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="299"/>
+        <source>Summarize this document for me and provide me with a clear result directly, without any unnecessary content.</source>
+        <translation>Підсумуй цей документ і надай мені зрозумілий результат безпосередньо без непотрібних даних.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="315"/>
+        <source>Translate this document for me and provide me with a clear result directly, without any unnecessary content.</source>
+        <translation>Зроби переклад цього документа і надай мені зрозумілий результат безпосередньо без непотрібних даних.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="331"/>
+        <source>Expand this document for me and provide me with a clear and expanded result directly, without any unnecessary content.</source>
+        <translation>Розшир цей документ і надай мені зрозумілий і розгорнутий результат безпосередньо без непотрібних даних.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="447"/>
+        <source>DDE Grand Search</source>
+        <translation>Великий пошук DDE</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="450"/>
+        <source>Unable to use %1, please go to the App Store to update the UOS AI version first.</source>
+        <translation>Неможливо скористатися %1. Будь ласка, спочатку перейдіть до крамниці програм і оновіть версію ШІ UOS.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/aitoolbar.cpp" line="451"/>
+        <source>Open App Store</source>
+        <translation>Відкрити крамницю програм</translation>
+    </message>
+</context>
+<context>
     <name>GrandSearch::BestMatchWidget</name>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/bestmatchwidget.cpp" line="23"/>
+        <location filename="../src/grand-search/gui/searchconfig/bestmatchwidget.cpp" line="28"/>
         <source>Best match</source>
         <translation>Найкращий відповідник</translation>
     </message>
@@ -12,12 +107,12 @@
 <context>
     <name>GrandSearch::BlackListWidget</name>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/blacklistwidget.cpp" line="26"/>
+        <location filename="../src/grand-search/gui/searchconfig/blacklistwidget.cpp" line="32"/>
         <source>Excluded path</source>
         <translation>Виключений шлях</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/blacklistwidget.cpp" line="37"/>
+        <location filename="../src/grand-search/gui/searchconfig/blacklistwidget.cpp" line="43"/>
         <source>Add paths to the exclusion list to prevent searching in them.</source>
         <translation>Додати шляхи до списку виключень для запобігання пошуку у них.</translation>
     </message>
@@ -25,7 +120,7 @@
 <context>
     <name>GrandSearch::CustomWidget</name>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/customwidget.cpp" line="26"/>
+        <location filename="../src/grand-search/gui/searchconfig/customwidget.cpp" line="31"/>
         <source>Custom search</source>
         <translation>Нетиповий пошук</translation>
     </message>
@@ -33,13 +128,13 @@
 <context>
     <name>GrandSearch::DdeGrandSearchDockPlugin</name>
     <message>
-        <location filename="../src/grand-search-dock-plugin/ddegrandsearchdockplugin.cpp" line="42"/>
-        <location filename="../src/grand-search-dock-plugin/ddegrandsearchdockplugin.cpp" line="86"/>
+        <location filename="../src/grand-search-dock-plugin/ddegrandsearchdockplugin.cpp" line="49"/>
+        <location filename="../src/grand-search-dock-plugin/ddegrandsearchdockplugin.cpp" line="122"/>
         <source>Grand Search</source>
         <translation>Великий пошук</translation>
     </message>
     <message>
-        <location filename="../src/grand-search-dock-plugin/ddegrandsearchdockplugin.cpp" line="149"/>
+        <location filename="../src/grand-search-dock-plugin/ddegrandsearchdockplugin.cpp" line="201"/>
         <source>Search settings</source>
         <translation>Параметри пошуку</translation>
     </message>
@@ -47,63 +142,70 @@
 <context>
     <name>GrandSearch::DeleteDialog</name>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/blacklistview/deletedialog.cpp" line="14"/>
+        <location filename="../src/grand-search/gui/searchconfig/blacklistview/deletedialog.cpp" line="19"/>
         <source>Do you want to remove the path from the exclusion list?</source>
         <translation>Хочете вилучити шлях зі списку виключень?</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/blacklistview/deletedialog.cpp" line="20"/>
+        <location filename="../src/grand-search/gui/searchconfig/blacklistview/deletedialog.cpp" line="29"/>
         <source>Cancel</source>
         <comment>button</comment>
         <translation>Скасувати</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/blacklistview/deletedialog.cpp" line="28"/>
+        <location filename="../src/grand-search/gui/searchconfig/blacklistview/deletedialog.cpp" line="41"/>
         <source>Confirm</source>
         <comment>button</comment>
         <translation>Підтвердити</translation>
     </message>
 </context>
 <context>
+    <name>GrandSearch::EmbeddingPluginWidget</name>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/embeddingpluginwidget.cpp" line="52"/>
+        <source>Installed</source>
+        <translation>Встановлено</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/embeddingpluginwidget.cpp" line="52"/>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/embeddingpluginwidget.cpp" line="91"/>
+        <source>Not Installed</source>
+        <translation>Не встановлено</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/embeddingpluginwidget.cpp" line="107"/>
+        <source>Install</source>
+        <translation>Встановити</translation>
+    </message>
+</context>
+<context>
     <name>GrandSearch::EntranceWidget</name>
     <message>
-        <location filename="../src/grand-search/gui/entrance/entrancewidget.cpp" line="225"/>
+        <location filename="../src/grand-search/gui/entrance/entrancewidget.cpp" line="61"/>
         <source>Search</source>
         <translation>Пошук</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/entrance/entrancewidget.cpp" line="226"/>
+        <location filename="../src/grand-search/gui/entrance/entrancewidget.cpp" line="62"/>
         <source>What would you like to search for?</source>
         <translation>Що ви хочете знайти?</translation>
     </message>
 </context>
 <context>
-    <name>GrandSearch::EntranceWidgetPrivate</name>
-    <message>
-        <location filename="../src/grand-search/gui/entrance/entrancewidget.cpp" line="78"/>
-        <source>Cut</source>
-        <translation>Вирізати</translation>
-    </message>
-    <message>
-        <location filename="../src/grand-search/gui/entrance/entrancewidget.cpp" line="82"/>
-        <source>Copy</source>
-        <translation>Копіювати</translation>
-    </message>
-    <message>
-        <location filename="../src/grand-search/gui/entrance/entrancewidget.cpp" line="86"/>
-        <source>Paste</source>
-        <translation>Вставити</translation>
-    </message>
-</context>
-<context>
     <name>GrandSearch::GeneralPreviewPlugin</name>
     <message>
-        <location filename="../src/grand-search/gui/exhibition/preview/generalpreviewplugin.cpp" line="193"/>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalpreviewplugin.cpp" line="231"/>
         <source>Location:</source>
         <translation>Місце:</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/exhibition/preview/generalpreviewplugin.cpp" line="204"/>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalpreviewplugin.cpp" line="260"/>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalpreviewplugin.cpp" line="327"/>
+        <source>Size:</source>
+        <translation>Розмір:</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalpreviewplugin.cpp" line="272"/>
         <source>Time modified:</source>
         <translation>Час внесення змін:</translation>
     </message>
@@ -111,84 +213,312 @@
 <context>
     <name>GrandSearch::GeneralToolBar</name>
     <message>
-        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/generaltoolbar.cpp" line="70"/>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/generaltoolbar.cpp" line="100"/>
         <source>Open</source>
         <translation>Відкрити</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/generaltoolbar.cpp" line="75"/>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/generaltoolbar.cpp" line="105"/>
         <source>Open Path</source>
         <translation>Відкрити шлях</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/generaltoolbar.cpp" line="80"/>
+        <location filename="../src/grand-search/gui/exhibition/preview/generalwidget/generaltoolbar.cpp" line="110"/>
         <source>Copy Path</source>
         <translation>Копіювати шлях</translation>
     </message>
 </context>
 <context>
+    <name>GrandSearch::GrandSearchListDelegate</name>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/matchresult/listview/grandsearchlistdelegate.cpp" line="250"/>
+        <source>Modified at </source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>GrandSearch::GroupWidget</name>
     <message>
-        <location filename="../src/grand-search/gui/exhibition/matchresult/groupwidget.cpp" line="288"/>
+        <location filename="../src/grand-search/gui/exhibition/matchresult/groupwidget.cpp" line="298"/>
+        <source>Please go to %1 to install the ULLM, and %2 Automatic index update.</source>
+        <translation>Будь ласка, перейдіть до %1 для встановлення ULLM і %2 автоматичного оновлення покажчика.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/matchresult/groupwidget.cpp" line="299"/>
+        <location filename="../src/grand-search/gui/exhibition/matchresult/groupwidget.cpp" line="308"/>
+        <source>Search configuration</source>
+        <translation>Налаштування пошуку</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/matchresult/groupwidget.cpp" line="300"/>
+        <location filename="../src/grand-search/gui/exhibition/matchresult/groupwidget.cpp" line="304"/>
+        <source>turn on</source>
+        <translation>вмикання</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/matchresult/groupwidget.cpp" line="303"/>
+        <source>Please %1 Automatic index update.</source>
+        <translation>Будь ласка, виконайте %1 автоматичного оновлення покажчика.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/matchresult/groupwidget.cpp" line="307"/>
+        <source>Please go to %1 to install the ULLM.</source>
+        <translation>Будь ласка, перейдіть до %1 для встановлення ULLM.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/matchresult/groupwidget.cpp" line="360"/>
         <source>More</source>
         <translation>Більше</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/exhibition/matchresult/groupwidget.cpp" line="324"/>
-        <source>No search results</source>
-        <translation type="unfinished">Нічого не знайдено</translation>
-    </message>
-</context>
-<context>
-    <name>GrandSearch::IndexWidget</name>
-    <message>
-        <location filename="../src/grand-search/gui/searchconfig/indexwidget.cpp" line="22"/>
-        <source>Index</source>
-        <translation>Покажчик</translation>
-    </message>
-</context>
-<context>
-    <name>GrandSearch::MainWindow</name>
-    <message>
-        <location filename="../src/grand-search/gui/mainwindow.cpp" line="208"/>
+        <location filename="../src/grand-search/gui/exhibition/matchresult/groupwidget.cpp" line="310"/>
+        <location filename="../src/grand-search/gui/exhibition/matchresult/groupwidget.cpp" line="396"/>
         <source>No search results</source>
         <translation>Нічого не знайдено</translation>
     </message>
 </context>
 <context>
+    <name>GrandSearch::IndexWidget</name>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/indexwidget.cpp" line="30"/>
+        <source>Index</source>
+        <translation>Покажчик</translation>
+    </message>
+</context>
+<context>
+    <name>GrandSearch::IntelligentRetrievalWidget</name>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="79"/>
+        <source>When turned on, you can try to search for local documents using natural language descriptions, such as &quot;last week&apos;s documents&quot;.</source>
+        <translation>Якщо увімкнено, ви зможете спробувати пошук локальних документів за допомогою описів природною мовою, таких як «документи минулого тижня».</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="188"/>
+        <source>Intelligent full text search</source>
+        <translation>Розумний повнотекстовий пошук</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="101"/>
+        <source>Automatic index update</source>
+        <translation>Автоматичне оновлення покажчика</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="66"/>
+        <source>AI Smart Search</source>
+        <translation>Розумний пошук ШІ</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="120"/>
+        <source>Full Text Search</source>
+        <translation>Повнотекстовий пошук</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="137"/>
+        <source>When turned on, full text search can be used in the file manager and grand search.</source>
+        <translation>Якщо увімкнено, можна буде користуватися повнотекстовим пошуком у програмі для керування файлами і Великому пошуку.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="157"/>
+        <source>Embedding Plugins</source>
+        <translation>Вбудовані додатки</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="157"/>
+        <source>After installing the model, you can use services such as AI Search and UOS AI Assistant..</source>
+        <translation>Після встановлення моделі ви можете користуватися такими службами, як ШІ-пошук і ШІ-помічник UOS.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="175"/>
+        <source>ULLM</source>
+        <translation>ULLM</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="175"/>
+        <source>After installing the ULLM, you can use the AI intelligent search function without an internet connection.</source>
+        <translation>Після встановлення ULLM ви можете скористатися розумним пошуком ШІ без потреби у з&apos;єднанні з інтернетом.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="224"/>
+        <source>When enabled, you can search the text of articles using disjointed and incomplete keywords.</source>
+        <translation>Якщо увімкнено, ви зможете шукати дані у тексті статей за допомогою відокремлених та неповних ключових слів.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="246"/>
+        <source>Please install %0 in &lt;a href=&quot;%0&quot;&gt;the app store&lt;/a&gt; before turning on this configuration.</source>
+        <translation>Будь ласка, встановіть %0 з &lt;a href=&quot;%0&quot;&gt;крамниці програм&lt;/a&gt;, перш ніж вмикати цю можливість.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="286"/>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="412"/>
+        <source>Intelligent search indexing is being updated, which may take up more resources, please keep the power access.</source>
+        <translation>Оновлюємо покажчик розумного пошуку, що може призвести до значного споживання ресурсів системи. Будь ласка, не вимикайте живлення.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="290"/>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="416"/>
+        <source>Smart Search indexing update is complete. Last update time: %0</source>
+        <translation>Оновлення покажчика розумного пошуку завершено. Час останнього оновлення: %0</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="293"/>
+        <source>Indexing error!</source>
+        <translation>Помилка індексування!</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="342"/>
+        <source>To use AI Smart Search, you need to install the Embedding Plugins and ULLM first.</source>
+        <translation>Щоб скористатися розумним пошуком ШІ, вам слід спочатку встановити вбудовані додатки і ULLM.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/intelligentretrieval/intelligentretrievalwidget.cpp" line="343"/>
+        <source>OK</source>
+        <translation>Гаразд</translation>
+    </message>
+</context>
+<context>
+    <name>GrandSearch::LLMWidget</name>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="62"/>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="387"/>
+        <source>Not Installed</source>
+        <translation>Не встановлено</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="79"/>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="386"/>
+        <source>Install Model</source>
+        <translation>Встановити модель</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="95"/>
+        <source>Update model</source>
+        <translation>Оновити модель</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="96"/>
+        <source>Uninstall model</source>
+        <translation>Вилучити модель</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="148"/>
+        <source>Installing</source>
+        <translation>Встановлення</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="214"/>
+        <source>Are you sure you want to delete this model?</source>
+        <translation>Ви справді хочете вилучити цю модель?</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="215"/>
+        <source>After uninstallation, functions such as AI Search and UOS AI Assistant will not work properly.</source>
+        <translation>ПІсля вилучення, буде порушено працездатність деяких можливостей, зокрема пошуку ШІ і Помічника ШІ UOS.</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="216"/>
+        <source>Cancel</source>
+        <comment>button</comment>
+        <translation>Скасувати</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="217"/>
+        <source>Confirm</source>
+        <comment>button</comment>
+        <translation>ПІдтвердити</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="326"/>
+        <source>Installing </source>
+        <translation>Встановлення</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="346"/>
+        <source>Installing the ULLM</source>
+        <translation>Встановлення ULLM</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="347"/>
+        <source>Exiting will cause the installation to fail, do you still want to exit?</source>
+        <translation>Вихід призведе до переривання встановлення. Ви справді хочете вийти?</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="348"/>
+        <source>Exit</source>
+        <comment>button</comment>
+        <translation>Вийти</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="349"/>
+        <source>Continue</source>
+        <comment>button</comment>
+        <translation>Продовжити</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="380"/>
+        <source>UnInstall Model</source>
+        <translation>Вилучити модель</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="381"/>
+        <source>Installed</source>
+        <translation>Встановлено</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/llmwidget/llmwidget.cpp" line="392"/>
+        <source>Please install the &quot;Embedding Plugins&quot; first before installing this model.</source>
+        <translation>Будь ласка, встановіть «Вбудовані додатки», перш ніж встановлювати цю модель.</translation>
+    </message>
+</context>
+<context>
+    <name>GrandSearch::MainWindow</name>
+    <message>
+        <location filename="../src/grand-search/gui/mainwindow.cpp" line="229"/>
+        <source>No search results</source>
+        <translation>Нічого не знайдено</translation>
+    </message>
+</context>
+<context>
+    <name>GrandSearch::MatchWidget</name>
+    <message>
+        <location filename="../src/grand-search/gui/exhibition/matchresult/matchwidget.cpp" line="90"/>
+        <source>Guess you want to search the following</source>
+        <translation>Гадаю, ви хотіли знайти таке:</translation>
+    </message>
+</context>
+<context>
     <name>GrandSearch::PlanWidget</name>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/planwidget.cpp" line="27"/>
+        <location filename="../src/grand-search/gui/searchconfig/planwidget.cpp" line="32"/>
         <source>Search experience program</source>
         <translation>Програма відгуків щодо пошуку</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/planwidget.cpp" line="35"/>
+        <location filename="../src/grand-search/gui/searchconfig/planwidget.cpp" line="40"/>
         <source>Join search experience program</source>
         <translation>Долучитися до програми відгуків щодо пошуку</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/planwidget.cpp" line="48"/>
+        <location filename="../src/grand-search/gui/searchconfig/planwidget.cpp" line="53"/>
         <source>Joining the search experience program means that you grant and authorize us to collect the information of your device and system, file icons, content and properties, applications and their configurations, the contents you search while using the Application, the time of search, the type of requested large model.If you refuse our collection and use of the aforementioned information, do not join the program.</source>
-        <translation type="unfinished"></translation>
+        <translation>Долучення до програми відгуків щодо пошуку означає, що ви надаєте нам дозвіл і уповноважуєте нас збирати відомості щодо вашого пристрою і системи, зокрема піктограм, вмісту та властивостей, програм та їхніх налаштувань, даних, які ви шукатимете за допомогою програми, часу пошуку, типу використаної великої мовної моделі. Якщо ви відмовляєте нам у збиранні даних і використанні згаданої вище інформації, не долучайтеся до програми.</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/planwidget.cpp" line="59"/>
+        <location filename="../src/grand-search/gui/searchconfig/planwidget.cpp" line="64"/>
         <source>To know more about the management of your data, please refer to the UnionTech Software Privacy Policy (</source>
         <translation>Щоб дізнатися більше про керування вашими даними, будь ласка, ознайомтеся із правилами конфіденційності щодо програмного забезпечення UnionTech (</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/planwidget.cpp" line="61"/>
+        <location filename="../src/grand-search/gui/searchconfig/planwidget.cpp" line="66"/>
         <source>https://www.uniontech.com/agreement/privacy-en</source>
         <translation>https://www.uniontech.com/agreement/privacy-en</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/planwidget.cpp" line="62"/>
+        <location filename="../src/grand-search/gui/searchconfig/planwidget.cpp" line="67"/>
         <source>https://www.deepin.org/en/agreement/privacy/</source>
         <translation>https://www.deepin.org/en/agreement/privacy/</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/planwidget.cpp" line="64"/>
+        <location filename="../src/grand-search/gui/searchconfig/planwidget.cpp" line="69"/>
         <source>).</source>
         <translation>).</translation>
     </message>
@@ -196,78 +526,106 @@
 <context>
     <name>GrandSearch::ScopeWidget</name>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/scopewidget.cpp" line="28"/>
+        <location filename="../src/grand-search/gui/searchconfig/scopewidget.cpp" line="33"/>
         <source>Search contents</source>
         <translation>Пошук вмісту</translation>
     </message>
 </context>
 <context>
+    <name>GrandSearch::SearchEdit</name>
+    <message>
+        <location filename="../src/grand-search/gui/entrance/searchedit.cpp" line="121"/>
+        <source>Search</source>
+        <translation type="unfinished">Пошук</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/entrance/searchedit.cpp" line="219"/>
+        <source>Cut</source>
+        <translation type="unfinished">Вирізати</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/entrance/searchedit.cpp" line="223"/>
+        <source>Copy</source>
+        <translation type="unfinished">Копіювати</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/entrance/searchedit.cpp" line="227"/>
+        <source>Paste</source>
+        <translation type="unfinished">Вставити</translation>
+    </message>
+</context>
+<context>
     <name>GrandSearch::SearchEngineWidget</name>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="36"/>
+        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="42"/>
         <source>Default search engine</source>
         <translation>Типовий рушій пошуку</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="44"/>
+        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="50"/>
         <source>Search for keywords by the default search engine.</source>
         <translation>Шукати за ключовими словами за допомогою типового рушія пошуку.</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="60"/>
+        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="62"/>
         <source>Default search engine is</source>
         <translation>Типовим рушієм пошуку є</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="69"/>
+        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="71"/>
         <source>Google</source>
         <translation>Google</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="70"/>
+        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="72"/>
         <source>Baidu</source>
         <translation>Baidu</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="71"/>
+        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="73"/>
         <source>Bing</source>
         <translation>Bing</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="72"/>
+        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="74"/>
         <source>Yahoo</source>
         <translation>Yahoo</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="73"/>
+        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="75"/>
         <source>360</source>
         <translation>360</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="74"/>
+        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="76"/>
+        <source>360 AI Search</source>
+        <translation>ШІ-пошук 360</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="77"/>
         <source>Sogou</source>
         <translation>Sogou</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="75"/>
+        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="78"/>
         <source>Custom</source>
-        <translation type="unfinished"></translation>
+        <translation>Нетиповий</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="95"/>
+        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="99"/>
         <source>You need to use &quot;%0&quot; to replace the keyword in the URL</source>
-        <translation type="unfinished"></translation>
+        <translation>Для заміни ключового слова в адресі вам слід скористатися «%0»</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="159"/>
+        <location filename="../src/grand-search/gui/searchconfig/searchenginewidget.cpp" line="167"/>
         <source>Invalid URL</source>
-        <translation type="unfinished"></translation>
+        <translation>Некоректна адреса</translation>
     </message>
 </context>
 <context>
     <name>GrandSearch::StaticTextWorker</name>
     <message>
-        <location filename="../src/libgrand-search-daemon/searcher/web/statictextworker.cpp" line="55"/>
+        <location filename="../src/dde-grand-search-daemon/searcher/web/statictextworker.cpp" line="66"/>
         <source>Search for &quot;%1&quot;</source>
         <translation>Шукати «%1»</translation>
     </message>
@@ -275,55 +633,50 @@
 <context>
     <name>GrandSearch::TailerWidget</name>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/tailerwidget.cpp" line="18"/>
+        <location filename="../src/grand-search/gui/searchconfig/tailerwidget.cpp" line="19"/>
         <source>Tailer settings</source>
         <translation>Параметри хвостовика</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/tailerwidget.cpp" line="28"/>
+        <location filename="../src/grand-search/gui/searchconfig/tailerwidget.cpp" line="29"/>
         <source>It is displayed at the end of search results for better identification and distinction of items with duplicate names.</source>
         <translation>Його буде показано наприкінці результатів пошуку для поліпшення ідентифікації та розрізнення записів із дубльованими назвами.</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/searchconfig/tailerwidget.cpp" line="41"/>
+        <location filename="../src/grand-search/gui/searchconfig/tailerwidget.cpp" line="38"/>
         <source>Parent directory</source>
         <translation>Батьківський каталог</translation>
-    </message>
-    <message>
-        <location filename="../src/grand-search/gui/searchconfig/tailerwidget.cpp" line="43"/>
-        <source>Time modified</source>
-        <translation>Час зміни</translation>
     </message>
 </context>
 <context>
     <name>GrandSearch::audio_preview::AudioPreviewPlugin</name>
     <message>
-        <location filename="../src/preview-plugin/audio-preview/audiopreviewplugin.cpp" line="57"/>
+        <location filename="../src/preview-plugin/audio-preview/audiopreviewplugin.cpp" line="70"/>
         <source>Artist:</source>
         <translation>Виконавець:</translation>
     </message>
     <message>
-        <location filename="../src/preview-plugin/audio-preview/audiopreviewplugin.cpp" line="69"/>
+        <location filename="../src/preview-plugin/audio-preview/audiopreviewplugin.cpp" line="82"/>
         <source>Album:</source>
         <translation>Альбом:</translation>
     </message>
     <message>
-        <location filename="../src/preview-plugin/audio-preview/audiopreviewplugin.cpp" line="94"/>
+        <location filename="../src/preview-plugin/audio-preview/audiopreviewplugin.cpp" line="107"/>
         <source>Duration:</source>
         <translation>Тривалість:</translation>
     </message>
     <message>
-        <location filename="../src/preview-plugin/audio-preview/audiopreviewplugin.cpp" line="109"/>
+        <location filename="../src/preview-plugin/audio-preview/audiopreviewplugin.cpp" line="122"/>
         <source>Type:</source>
         <translation>Тип:</translation>
     </message>
     <message>
-        <location filename="../src/preview-plugin/audio-preview/audiopreviewplugin.cpp" line="121"/>
+        <location filename="../src/preview-plugin/audio-preview/audiopreviewplugin.cpp" line="134"/>
         <source>Location:</source>
         <translation>Місце:</translation>
     </message>
     <message>
-        <location filename="../src/preview-plugin/audio-preview/audiopreviewplugin.cpp" line="135"/>
+        <location filename="../src/preview-plugin/audio-preview/audiopreviewplugin.cpp" line="148"/>
         <source>Time modified:</source>
         <translation>Час внесення змін:</translation>
     </message>
@@ -331,27 +684,27 @@
 <context>
     <name>GrandSearch::image_preview::ImagePreviewPlugin</name>
     <message>
-        <location filename="../src/preview-plugin/image-preview/imagepreviewplugin.cpp" line="53"/>
+        <location filename="../src/preview-plugin/image-preview/imagepreviewplugin.cpp" line="78"/>
         <source>Dimensions:</source>
         <translation>Розмірності:</translation>
     </message>
     <message>
-        <location filename="../src/preview-plugin/image-preview/imagepreviewplugin.cpp" line="69"/>
+        <location filename="../src/preview-plugin/image-preview/imagepreviewplugin.cpp" line="94"/>
         <source>Type:</source>
         <translation>Тип:</translation>
     </message>
     <message>
-        <location filename="../src/preview-plugin/image-preview/imagepreviewplugin.cpp" line="84"/>
+        <location filename="../src/preview-plugin/image-preview/imagepreviewplugin.cpp" line="109"/>
         <source>Size:</source>
         <translation>Розмір:</translation>
     </message>
     <message>
-        <location filename="../src/preview-plugin/image-preview/imagepreviewplugin.cpp" line="96"/>
+        <location filename="../src/preview-plugin/image-preview/imagepreviewplugin.cpp" line="121"/>
         <source>Location:</source>
         <translation>Місце:</translation>
     </message>
     <message>
-        <location filename="../src/preview-plugin/image-preview/imagepreviewplugin.cpp" line="110"/>
+        <location filename="../src/preview-plugin/image-preview/imagepreviewplugin.cpp" line="135"/>
         <source>Time modified:</source>
         <translation>Час внесення змін:</translation>
     </message>
@@ -359,94 +712,107 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/grand-search/gui/datadefine.h" line="24"/>
+        <location filename="../src/grand-search/gui/datadefine.h" line="25"/>
         <source>Best match</source>
         <translation>Найкращий відповідник</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/datadefine.h" line="25"/>
+        <location filename="../src/grand-search/gui/datadefine.h" line="26"/>
         <source>Applications</source>
         <translation>Програми</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/datadefine.h" line="26"/>
+        <location filename="../src/grand-search/gui/datadefine.h" line="27"/>
         <source>Settings</source>
         <translation>Налаштування</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/datadefine.h" line="27"/>
+        <location filename="../src/grand-search/gui/datadefine.h" line="28"/>
         <source>Videos</source>
         <translation>Відео</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/datadefine.h" line="28"/>
+        <location filename="../src/grand-search/gui/datadefine.h" line="29"/>
         <source>Music</source>
         <translation>Музика</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/datadefine.h" line="29"/>
+        <location filename="../src/grand-search/gui/datadefine.h" line="30"/>
         <source>Pictures</source>
         <translation>Зображення</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/datadefine.h" line="30"/>
+        <location filename="../src/grand-search/gui/datadefine.h" line="31"/>
         <source>Documents</source>
         <translation>Документи</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/datadefine.h" line="31"/>
+        <location filename="../src/grand-search/gui/datadefine.h" line="32"/>
         <source>Folders</source>
         <translation>Теки</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/datadefine.h" line="32"/>
+        <location filename="../src/grand-search/gui/datadefine.h" line="33"/>
         <source>Files</source>
         <translation>Файли</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/datadefine.h" line="33"/>
+        <location filename="../src/grand-search/gui/datadefine.h" line="34"/>
         <source>Web</source>
         <translation>Інтернет</translation>
     </message>
     <message>
-        <location filename="../src/grand-search/gui/datadefine.h" line="34"/>
+        <location filename="../src/grand-search/gui/datadefine.h" line="35"/>
         <source>AI Search</source>
-        <translation type="unfinished"></translation>
+        <translation>ШІ-пошук</translation>
     </message>
     <message>
-        <location filename="../src/preview-plugin/video-preview/videopreviewplugin.cpp" line="26"/>
+        <location filename="../src/grand-search/gui/datadefine.h" line="36"/>
+        <source>Text found in the image</source>
+        <translation>Знайдений текст на зображенні</translation>
+    </message>
+    <message>
+        <location filename="../src/preview-plugin/video-preview/videopreviewplugin.cpp" line="28"/>
         <source>Dimensions:</source>
         <translation>Розмірності:</translation>
     </message>
     <message>
-        <location filename="../src/preview-plugin/video-preview/videopreviewplugin.cpp" line="27"/>
+        <location filename="../src/preview-plugin/video-preview/videopreviewplugin.cpp" line="29"/>
         <source>Type:</source>
         <translation>Тип:</translation>
     </message>
     <message>
-        <location filename="../src/preview-plugin/video-preview/videopreviewplugin.cpp" line="28"/>
+        <location filename="../src/preview-plugin/video-preview/videopreviewplugin.cpp" line="30"/>
         <source>Size:</source>
         <translation>Розмір:</translation>
     </message>
     <message>
-        <location filename="../src/preview-plugin/video-preview/videopreviewplugin.cpp" line="29"/>
+        <location filename="../src/preview-plugin/video-preview/videopreviewplugin.cpp" line="31"/>
         <source>Duration:</source>
         <translation>Тривалість:</translation>
     </message>
     <message>
-        <location filename="../src/preview-plugin/video-preview/videopreviewplugin.cpp" line="30"/>
+        <location filename="../src/preview-plugin/video-preview/videopreviewplugin.cpp" line="32"/>
         <source>Location:</source>
         <translation>Місце:</translation>
     </message>
     <message>
-        <location filename="../src/preview-plugin/video-preview/videopreviewplugin.cpp" line="31"/>
+        <location filename="../src/preview-plugin/video-preview/videopreviewplugin.cpp" line="33"/>
         <source>Time modified:</source>
         <translation>Час внесення змін:</translation>
     </message>
+</context>
+<context>
+    <name>searchitem</name>
     <message>
-        <location filename="../src/libgrand-search-daemon/searcher/file/filesearchutils.cpp" line="203"/>
-        <source>modified</source>
-        <translation>змінено</translation>
+        <location filename="../src/grand-search-shell-plugin/package/searchitem.qml" line="24"/>
+        <source>GrandSearch</source>
+        <translation>ГрандПошук</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search-shell-plugin/package/searchitem.qml" line="81"/>
+        <source>SearchConfig</source>
+        <translation>Налаштування пошуку</translation>
     </message>
 </context>
 </TS>

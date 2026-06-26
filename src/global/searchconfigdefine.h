@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -56,7 +56,7 @@
 // 配置切换界面参数
 #define SWITCHWIDGETWIDTH       476
 #define SWITCHWIDGETHEIGHT      36
-#define SWITCHWIDGETICONSIZE    36
+#define SWITCHWIDGETICONSIZE    24
 #define CHECKBOXITEMWIDTH       476
 #define CHECKBOXITEMHEIGHT      36
 #define COMBOBOXWIDGETWIDTH     476

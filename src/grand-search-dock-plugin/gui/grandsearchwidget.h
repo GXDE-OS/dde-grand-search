@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -36,9 +36,6 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void leaveEvent(QEvent *event) override;
-
-private:
-    const QPixmap loadSvg(const QString &fileName, const QSize &size) const;
 
 private:
     bool m_hover = false;   // 鼠标是否悬浮

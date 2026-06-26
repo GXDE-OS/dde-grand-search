@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -18,7 +18,6 @@ public:
     ~SemanticParser();
     bool connectToVector(const QString &service);
     bool connectToQueryLang(const QString &service);
-    QString analyze(const QString &text);
     QString vectorSearch(const QString &prompt);
     QString query(const QString &text);
     bool isVectorSupported();

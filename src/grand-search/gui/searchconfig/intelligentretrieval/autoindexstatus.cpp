@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -24,7 +24,7 @@ AutoIndexStatus::AutoIndexStatus(QWidget *parent) : QWidget(parent)
 
     m_icon = new QLabel(this);
     m_icon->setFixedSize(30, 30);
-    m_icon->setMargin(0);
+    m_icon->setContentsMargins(0, 0, 0, 0);
 
     QWidget *spinnerContainer = new QWidget(this);
     {

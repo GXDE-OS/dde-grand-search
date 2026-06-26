@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -13,31 +13,41 @@
 #include <DLabel>
 #include <DPushButton>
 #include <DHorizontalLine>
-#include <DApplicationHelper>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#    include <DGuiApplicationHelper>
+#else
+#    include <DApplicationHelper>
+#endif
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#    include <DPaletteHelper>
+#endif
 #include <DSpinner>
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QLoggingCategory>
+#include <QTextDocument>
+
+Q_DECLARE_LOGGING_CATEGORY(logGrandSearch)
 
 using namespace GrandSearch;
 DWIDGET_USE_NAMESPACE
 
-#define ListItemHeight            36       // 列表行高
-#define GroupLabelHeight          28       // 组标签高度
-#define MoreBtnMaxHeight          25       // 查看更多按钮最大高度
-#define LayoutMagrinSize          10       // 布局边距
-#define SpacerWidth               40       // 弹簧宽度
-#define SpacerHeight              20       // 弹簧高度
+#define ListItemHeight 36   // 列表行高
+#define GroupLabelHeight 28   // 组标签高度
+#define MoreBtnMaxHeight 25   // 查看更多按钮最大高度
+#define LayoutMagrinSize 10   // 布局边距
+#define SpacerWidth 40   // 弹簧宽度
+#define SpacerHeight 20   // 弹簧高度
 
 GroupWidgetPrivate::GroupWidgetPrivate(GroupWidget *parent)
     : q_p(parent)
 {
-
 }
 
 GroupWidget::GroupWidget(QWidget *parent)
-    : DWidget(parent)
-    , d_p(new GroupWidgetPrivate(this))
+    : DWidget(parent),
+      d_p(new GroupWidgetPrivate(this))
 {
     m_firstFiveItems.clear();
     m_restShowItems.clear();
@@ -50,7 +60,6 @@ GroupWidget::GroupWidget(QWidget *parent)
 
 GroupWidget::~GroupWidget()
 {
-
 }
 
 void GroupWidget::setGroupName(const QString &groupName)
@@ -63,23 +72,35 @@ void GroupWidget::setGroupName(const QString &groupName)
     AC_SET_ACCESSIBLE_NAME(m_listView, groupName);
 }
 
-void GroupWidget::appendMatchedItems(const MatchedItems &newItems, const QString& searchGroupName)
+void GroupWidget::setSearchKeyword(const QString &keyword)
+{
+    Q_ASSERT(m_listView);
+    m_listView->setSearchKeyword(keyword);
+}
+
+void GroupWidget::appendMatchedItems(const MatchedItems &newItems, const QString &searchGroupName)
 {
     Q_UNUSED(searchGroupName)
 
     if (newItems.isEmpty())
         return;
 
+    // Deduplicate: remove/replace items with same file path, preferring higher weight
+    MatchedItems dedupedItems = newItems;
+    deduplicateByPath(dedupedItems);
+    if (dedupedItems.isEmpty())
+        return;
+
     // 结果列表未展开
     if (!m_bListExpanded) {
         // 当前组没有数据，则需要判断本次数据是否包含权重
         if (0 == m_listView->rowCount()) {
-            const MatchedItem &item = newItems.first();
+            const MatchedItem &item = dedupedItems.first();
             if (!item.extra.isNull()
-                    && item.extra.type() == QVariant::Hash
-                    && item.extra.toHash().keys().contains(GRANDSEARCH_PROPERTY_ITEM_WEIGHT)) {
+                && item.extra.type() == QVariant::Hash
+                && item.extra.toHash().keys().contains(GRANDSEARCH_PROPERTY_ITEM_WEIGHT)) {
                 // 已经排序过，直接显示
-                m_cacheWeightItems << newItems;
+                m_cacheWeightItems << dedupedItems;
                 updateShowItems(m_cacheWeightItems);
 
                 return;
@@ -87,12 +108,12 @@ void GroupWidget::appendMatchedItems(const MatchedItems &newItems, const QString
         }
 
         // 对未展开的数据排序
-        m_cacheItems << newItems;
+        m_cacheItems << dedupedItems;
         Utils::sortByWeight(m_cacheItems);
         updateShowItems(m_cacheItems);
     } else {
         // 结果列表已展开，已经显示的数据保持不变，仅对新增数据排序，然后追加到列表末尾
-        MatchedItems& tempNewItems = const_cast<MatchedItems&>(newItems);
+        MatchedItems &tempNewItems = const_cast<MatchedItems &>(dedupedItems);
         Utils::sortByWeight(tempNewItems);
         m_listView->addRows(tempNewItems);
     }
@@ -109,7 +130,7 @@ bool GroupWidget::isHorLineVisilbe()
 {
     Q_ASSERT(m_line);
 
-    return  m_line->isVisible();
+    return m_line->isVisible();
 }
 
 GrandSearchListView *GroupWidget::getListView()
@@ -136,7 +157,9 @@ int GroupWidget::getCurSelectHeight()
     int nHeight = 0;
     if (m_listView->currentIndex().isValid() || m_viewMoreButton->isSelected()) {
         nHeight += m_groupLabel->height();
-        nHeight += (m_listView->currentIndex().row() + 1) * ListItemHeight;
+        int curRow = m_listView->currentIndex().row();
+        for (int i = 0; i <= curRow; ++i)
+            nHeight += m_listView->sizeHintForRow(i);
     }
 
     return nHeight;
@@ -148,7 +171,19 @@ void GroupWidget::reLayout()
     Q_ASSERT(m_groupLabel);
     Q_ASSERT(m_line);
 
-    m_listView->setFixedHeight(m_listView->rowCount() * ListItemHeight);
+    int totalHeight = 0;
+    for (int i = 0; i < m_listView->rowCount(); ++i)
+        totalHeight += m_listView->sizeHintForRow(i);
+    m_listView->setFixedHeight(totalHeight);
+
+    int labelWidth = this->width() - LayoutMagrinSize * 2 - (m_groupIcon->isVisible() ? 23 : 0);
+    QTextDocument doc;
+    doc.setHtml(m_groupLabel->text());
+    doc.setDefaultFont(m_groupLabel->font());
+    doc.setTextWidth(labelWidth);
+    int groupLabelTextHeight = static_cast<int>(doc.size().height());
+    int groupLabelHeight = qMax(groupLabelTextHeight, GroupLabelHeight);
+    m_groupLabel->setFixedHeight(groupLabelHeight);
 
     int nHeight = 0;
     nHeight += m_groupLabel->height();
@@ -156,8 +191,16 @@ void GroupWidget::reLayout()
     if (m_listView->isVisible())
         nHeight += m_listView->height();
 
-    if (m_resultLabel->isVisible())
+    if (m_resultLabel->isVisible()) {
+        int labelWidth = this->width() - LayoutMagrinSize * 2;
+        QTextDocument doc;
+        doc.setHtml(m_resultLabel->text());
+        doc.setDefaultFont(m_resultLabel->font());
+        doc.setTextWidth(labelWidth);
+        int textHeight = static_cast<int>(doc.size().height());
+        m_resultLabel->setFixedHeight(textHeight + 14);
         nHeight += m_resultLabel->height();
+    }
 
     if (!m_line->isHidden()) {
         nHeight += m_line->height();
@@ -216,10 +259,10 @@ QString GroupWidget::groupName() const
 void GroupWidget::setIcon(const QIcon &icon)
 {
     if (icon.isNull()) {
-       m_groupIcon->hide();
+        m_groupIcon->hide();
     } else {
-       m_groupIcon->setPixmap(icon.pixmap(QSize(18, 18)));
-       m_groupIcon->show();
+        m_groupIcon->setPixmap(icon.pixmap(QSize(18, 18)));
+        m_groupIcon->show();
     }
 }
 
@@ -246,22 +289,29 @@ void GroupWidget::showLabel(bool bShow)
         bool isUpdateIdx = IntelligentRetrievalWidget::isUpdateIndex();
         // 有无安装大模型
         bool hasModel = IntelligentRetrievalWidget::isQueryLangSupported();
-        qDebug() << QString("idxDir(%1) hasIdx(%2) isUpdateIdx(%3) hasModel(%4)").arg(idxDir).arg(hasIdx).arg(isUpdateIdx).arg(hasModel);
+        qCDebug(logGrandSearch) << "AI inference state - Index directory:" << idxDir
+                                << "Has index:" << hasIdx
+                                << "Auto-update enabled:" << isUpdateIdx
+                                << "Model available:" << hasModel;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        const QColor &color = DPaletteHelper::instance()->palette(m_resultLabel).color(DPalette::Normal, DPalette::Highlight);
+#else
         const QColor &color = DApplicationHelper::instance()->palette(m_resultLabel).color(DPalette::Normal, DPalette::Highlight);
+#endif
         if (!hasIdx && !isUpdateIdx && !hasModel) {
-            // 请先前往搜索配置安装UOS AI大模型，并开启自动更新索引 Please go to Search configration to install the UOS AI large model, and turn on Automatic index update.
-            m_resultLabel->setText(tr("Please go to %1 to install the UOS AI large model, and %2 Automatic index update.")
-                                   .arg(QString("<a href=\"config\" style=\"color:%1; text-decoration: none;\">%2</a>").arg(color.name()).arg(tr("Search configration")))
-                                   .arg(QString("<a href=\"update index\" style=\"color:%1; text-decoration: none;\">%2</a>").arg(color.name()).arg(tr("turn on"))));
+            // 请先前往搜索配置安装UOS AI大模型，并开启自动更新索引 Please go to Search configuration to install the ULLM, and turn on Automatic index update.
+            m_resultLabel->setText(tr("Please go to %1 to install the ULLM, and %2 Automatic index update.")
+                                           .arg(QString("<a href=\"config\" style=\"color:%1; text-decoration: none;\">%2</a>").arg(color.name()).arg(tr("Search configuration")))
+                                           .arg(QString("<a href=\"update index\" style=\"color:%1; text-decoration: none;\">%2</a>").arg(color.name()).arg(tr("turn on"))));
         } else if (!hasIdx && !isUpdateIdx) {
             // 请先开启自动更新索引 Please turn on Automatic index update.
             m_resultLabel->setText(tr("Please %1 Automatic index update.")
-                                   .arg(QString("<a href=\"update index\" style=\"color:%1; text-decoration: none;\">%2</a>").arg(color.name()).arg(tr("turn on"))));
+                                           .arg(QString("<a href=\"update index\" style=\"color:%1; text-decoration: none;\">%2</a>").arg(color.name()).arg(tr("turn on"))));
         } else if (!hasModel) {
-            // 请先前往搜索配置安装UOS AI大模型 Please go to Search configration to install the UOS AI large model.
-            m_resultLabel->setText(tr("Please go to %1 to install the UOS AI large model.")
-                                   .arg(QString("<a href=\"config\" style=\"color:%1; text-decoration: none;\">%2</a>").arg(color.name()).arg(tr("Search configration"))));
+            // 请先前往搜索配置安装UOS AI大模型 Please go to Search configuration to install the UOS AI large model.
+            m_resultLabel->setText(tr("Please go to %1 to install the ULLM.")
+                                           .arg(QString("<a href=\"config\" style=\"color:%1; text-decoration: none;\">%2</a>").arg(color.name()).arg(tr("Search configuration"))));
         } else {
             m_resultLabel->setText(tr("No search results"));
         }
@@ -270,18 +320,8 @@ void GroupWidget::showLabel(bool bShow)
 
 QString GroupWidget::convertDisplayName(const QString &searchGroupName)
 {
-    static const QHash<QString, QString> groupDisplayName{
-        {GRANDSEARCH_GROUP_BEST, GroupName_Best}
-        , {GRANDSEARCH_GROUP_APP, GroupName_App}
-        , {GRANDSEARCH_GROUP_SETTING, GroupName_Setting}
-        , {GRANDSEARCH_GROUP_FILE_VIDEO, GroupName_Video}
-        , {GRANDSEARCH_GROUP_FILE_AUDIO, GroupName_Audio}
-        , {GRANDSEARCH_GROUP_FILE_PICTURE, GroupName_Picture}
-        , {GRANDSEARCH_GROUP_FILE_DOCUMNET, GroupName_Document}
-        , {GRANDSEARCH_GROUP_FOLDER, GroupName_Folder}
-        , {GRANDSEARCH_GROUP_FILE, GroupName_File}
-        , {GRANDSEARCH_GROUP_WEB, GroupName_Web}
-        , {GRANDSEARCH_GROUP_FILE_INFERENCE, GroupName_Inference}
+    static const QHash<QString, QString> groupDisplayName {
+        { GRANDSEARCH_GROUP_BEST, GroupName_Best }, { GRANDSEARCH_GROUP_APP, GroupName_App }, { GRANDSEARCH_GROUP_SETTING, GroupName_Setting }, { GRANDSEARCH_GROUP_FILE_VIDEO, GroupName_Video }, { GRANDSEARCH_GROUP_FILE_AUDIO, GroupName_Audio }, { GRANDSEARCH_GROUP_FILE_PICTURE, GroupName_Picture }, { GRANDSEARCH_GROUP_FILE_DOCUMNET, GroupName_Document }, { GRANDSEARCH_GROUP_FOLDER, GroupName_Folder }, { GRANDSEARCH_GROUP_FILE, GroupName_File }, { GRANDSEARCH_GROUP_WEB, GroupName_Web }, { GRANDSEARCH_GROUP_FILE_INFERENCE, GroupName_Inference }, { GRANDSEARCH_GROUP_FILE_OCR, GroupName_Ocr }
     };
 
     return groupDisplayName.value(searchGroupName, searchGroupName);
@@ -290,9 +330,9 @@ QString GroupWidget::convertDisplayName(const QString &searchGroupName)
 void GroupWidget::initUi()
 {
     // 获取设置当前窗口文本颜色
-    QColor groupTextColor = QColor(0, 0, 0, static_cast<int>(255*0.6));
+    QColor groupTextColor = QColor(0, 0, 0, static_cast<int>(255 * 0.6));
     if (DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::DarkType)
-        groupTextColor = QColor(255, 255, 255, static_cast<int>(255*0.6));
+        groupTextColor = QColor(255, 255, 255, static_cast<int>(255 * 0.6));
     QPalette labelPalette;
     labelPalette.setColor(QPalette::WindowText, groupTextColor);
 
@@ -304,14 +344,15 @@ void GroupWidget::initUi()
 
     // 组名标签
     m_groupLabel = new DLabel("", this);
-    m_groupLabel->setFixedHeight(GroupLabelHeight);
+    m_groupLabel->setMinimumHeight(GroupLabelHeight);
     m_groupLabel->setPalette(labelPalette);
     m_groupLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
     m_groupLabel->setContentsMargins(0, 0, 0, 0);
+    m_groupLabel->setWordWrap(true);
 
     // 组名图标
     m_groupIcon = new DLabel("", this);
-    m_groupIcon->setFixedSize(QSize(23, GroupLabelHeight)); // 18px of icon and 5px space
+    m_groupIcon->setFixedSize(QSize(23, GroupLabelHeight));   // 18px of icon and 5px space
     m_groupIcon->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
     m_groupLabel->setContentsMargins(0, 5, 5, 5);
     m_groupIcon->hide();
@@ -334,7 +375,7 @@ void GroupWidget::initUi()
 
     QWidget *spinnerContainer = new QWidget(this);
     {
-        spinnerContainer->setFixedSize(38, 18); //20px space on right.
+        spinnerContainer->setFixedSize(38, 18);   // 20px space on right.
         m_spinner = new DSpinner(spinnerContainer);
         m_spinner->setAttribute(Qt::WA_TransparentForMouseEvents);
         m_spinner->setFocusPolicy(Qt::NoFocus);
@@ -349,7 +390,7 @@ void GroupWidget::initUi()
     m_hTitelLayout->setSpacing(0);
     m_hTitelLayout->addWidget(m_groupIcon);
     m_hTitelLayout->addWidget(m_groupLabel);
-    m_hTitelLayout->addSpacerItem(new QSpacerItem(SpacerWidth,SpacerHeight,QSizePolicy::Expanding, QSizePolicy::Minimum));
+    m_hTitelLayout->addSpacerItem(new QSpacerItem(SpacerWidth, SpacerHeight, QSizePolicy::Expanding, QSizePolicy::Minimum));
     m_hTitelLayout->addWidget(m_viewMoreButton);
     m_hTitelLayout->addWidget(spinnerContainer);
 
@@ -362,15 +403,14 @@ void GroupWidget::initUi()
     DFontSizeManager::instance()->bind(m_resultLabel, DFontSizeManager::T8, QFont::Normal);
     // color
     {
-        QColor colorText = DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::DarkType ?
-                    Qt::white : Qt::black;
+        QColor colorText = DGuiApplicationHelper::instance()->themeType() == DGuiApplicationHelper::DarkType ? Qt::white : Qt::black;
         colorText.setAlphaF(0.5);
         auto pal = m_resultLabel->palette();
         pal.setColor(m_resultLabel->foregroundRole(), colorText);
         m_resultLabel->setPalette(pal);
     }
-    m_resultLabel->setFixedHeight(14 + DFontSizeManager::instance()->fontPixelSize(DFontSizeManager::T8));
-    m_resultLabel->setAlignment(Qt::AlignBottom | Qt::AlignLeft);
+    m_resultLabel->setWordWrap(true);
+    m_resultLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     m_resultLabel->setContentsMargins(LayoutMagrinSize, 10, 0, 0);
     m_resultLabel->hide();
 
@@ -379,7 +419,7 @@ void GroupWidget::initUi()
 
     // 列表和分割线放到内容布局内
     m_vContentLayout = new QVBoxLayout();
-    m_vContentLayout->setMargin(0);
+    m_vContentLayout->setContentsMargins(0, 0, 0, 0);
     m_vContentLayout->setSpacing(0);
     m_vContentLayout->addWidget(m_listView);
     m_vContentLayout->addWidget(m_resultLabel);
@@ -396,6 +436,41 @@ void GroupWidget::initConnect()
 
     connect(m_viewMoreButton, &DPushButton::clicked, this, &GroupWidget::onMoreBtnClicked);
     connect(m_resultLabel, &DLabel::linkActivated, this, &GroupWidget::onOpenConfig);
+}
+
+void GroupWidget::deduplicateByPath(MatchedItems &newItems)
+{
+    MatchedItems filtered;
+    QSet<QString> seenInBatch;
+
+    auto weightOf = [](const MatchedItem &item) {
+        return item.extra.toHash()
+                     .value(GRANDSEARCH_PROPERTY_ITEM_WEIGHT, 0)
+                     .toDouble();
+    };
+
+    for (const auto &newItem : newItems) {
+        const QString &path = newItem.item;
+        if (path.isEmpty())
+            continue;
+
+        if (seenInBatch.contains(path))
+            continue;
+        seenInBatch.insert(path);
+
+        const double newWeight = weightOf(newItem);
+
+        MatchedItem existing = findItemByPath(path);
+        if (!existing.item.isEmpty()) {
+            if (newWeight <= weightOf(existing))
+                continue;
+            updateItemByPath(path, newItem);
+        } else {
+            filtered << newItem;
+        }
+    }
+
+    newItems = filtered;
 }
 
 void GroupWidget::updateShowItems(MatchedItems &items)
@@ -453,12 +528,65 @@ void GroupWidget::onMoreBtnClicked()
     m_bListExpanded = true;
 }
 
-void GroupWidget::onOpenConfig(const QString& link)
+void GroupWidget::onOpenConfig(const QString &link)
 {
+    const QStringList args = { "-s", "--position", "aiconfig" };
     if (link == "update index") {
         IntelligentRetrievalWidget::setAutoIndex(true);
-        QProcess::startDetached("dde-grand-search -s --position aiconfig");
+        QProcess::startDetached("dde-grand-search", args);
     } else if (link == "config") {
-        QProcess::startDetached("dde-grand-search -s --position aiconfig");
+        QProcess::startDetached("dde-grand-search", args);
     }
+}
+
+MatchedItem GroupWidget::findItemByPath(const QString &path) const
+{
+    auto findIn = [&](const MatchedItems &items) -> MatchedItem {
+        for (const auto &item : items) {
+            if (item.item == path)
+                return item;
+        }
+        return {};
+    };
+
+    MatchedItem found = findIn(m_firstFiveItems);
+    if (!found.item.isEmpty()) return found;
+
+    found = findIn(m_restShowItems);
+    if (!found.item.isEmpty()) return found;
+
+    found = findIn(m_cacheItems);
+    if (!found.item.isEmpty()) return found;
+
+    return findIn(m_cacheWeightItems);
+}
+
+bool GroupWidget::updateItemByPath(const QString &path, const MatchedItem &newItem)
+{
+    auto doUpdate = [&](MatchedItems &items) -> bool {
+        for (int i = 0; i < items.size(); ++i) {
+            if (items[i].item == path) {
+                items[i] = newItem;
+                return true;
+            }
+        }
+        return false;
+    };
+
+    bool updated = false;
+    updated |= doUpdate(m_firstFiveItems);
+    updated |= doUpdate(m_restShowItems);
+    updated |= doUpdate(m_cacheItems);
+    updated |= doUpdate(m_cacheWeightItems);
+
+    if (updated) {
+        if (m_bListExpanded) {
+            MatchedItems all = m_firstFiveItems + m_restShowItems;
+            m_listView->setMatchedItems(all);
+        } else {
+            m_listView->setMatchedItems(m_firstFiveItems);
+        }
+    }
+
+    return updated;
 }

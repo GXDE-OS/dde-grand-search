@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -50,7 +50,7 @@ TEST(HyperlinkLabelTest, paintEvent)
         return region;
     });
 
-    QPaintEvent event(region);
+    QPaintEvent event(rect);
 
     w.paintEvent(&event);
     EXPECT_EQ(w.m_hyperlinkRegion, region);

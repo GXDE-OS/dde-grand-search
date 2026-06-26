@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -28,6 +28,7 @@ public:
     void addDownloadTask(const QUrl &url);
     void cancelDownloads();
     bool isFinished() { return m_finished; }
+    static QString checkCDN(QFile *file);
 
 signals:
     void downloadFinished();
@@ -41,6 +42,7 @@ private:
     QNetworkAccessManager *m_manager;
     QString m_downloadDirectory;
     QList<QNetworkReply*> m_activeDownloads;
+    QHash<QString, QString> urlToFileName;
     bool m_finished;
 
     QMutex mutex;

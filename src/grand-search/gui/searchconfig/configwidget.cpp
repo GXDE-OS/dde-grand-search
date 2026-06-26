@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -17,6 +17,9 @@
 #include <QPushButton>
 #include <QCloseEvent>
 #include <QScrollBar>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(logGrandSearch)
 
 #define MAINWINDOW_WIDTH    696
 #define MAINWINDOW_HEIGHT   529
@@ -27,12 +30,15 @@ DWIDGET_USE_NAMESPACE
 ConfigWidget::ConfigWidget(QWidget *parent)
     : DMainWindow(parent)
 {
+    qCDebug(logGrandSearch) << "Creating ConfigWidget";
     initUI();
     initData();
+    qCDebug(logGrandSearch) << "ConfigWidget created successfully";
 }
 
 ConfigWidget::~ConfigWidget()
 {
+    qCDebug(logGrandSearch) << "Destroying ConfigWidget";
 }
 
 void ConfigWidget::initUI()
@@ -46,7 +52,7 @@ void ConfigWidget::initUI()
     this->titlebar()->setMenuVisible(false);
 
     // 设置图标
-    QIcon tmpIcon = QIcon(QString(":/icons/%1.svg").arg("dde-grand-search-setting"));
+    QIcon tmpIcon = QIcon::fromTheme("dde-grand-search-setting");
     this->titlebar()->setIcon(tmpIcon);
     setWindowIcon(tmpIcon);
     QWidget *mainWidget = new QWidget(this);
@@ -93,6 +99,7 @@ void ConfigWidget::initData()
 
 void ConfigWidget::scrollToAiConfig()
 {
+    qCDebug(logGrandSearch) << "Scrolling to AI configuration section";
     QPoint targetPos = m_indexWidget->mapTo(m_scrollArea->viewport(), QPoint(0, 0));
     m_scrollArea->verticalScrollBar()->setValue(targetPos.y());
 }

@@ -6,8 +6,9 @@ set(CMAKE_AUTOMOC ON)
 
 set(LIB_NAME luceneengine)
 
-find_package(Qt5 COMPONENTS Gui REQUIRED)
+find_package(${QT_NS} COMPONENTS Gui REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(dfm${DTK_VERSION_MAJOR}-search REQUIRED)
 
 pkg_check_modules(Lucene REQUIRED IMPORTED_TARGET liblucene++ liblucene++-contrib)
 
@@ -30,6 +31,7 @@ target_include_directories(${LIB_NAME}
 
 target_link_libraries(
     ${LIB_NAME}
-    Qt5::Gui
+    ${QT_NS}::Gui
     PkgConfig::Lucene
+    dfm${DTK_VERSION_MAJOR}-search
 )

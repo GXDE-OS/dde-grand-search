@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -9,6 +9,9 @@
 
 #include <QFileInfo>
 #include <QDateTime>
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(logImagePreview, "org.deepin.dde.grandsearch.plugin.image")
 
 GRANDSEARCH_USE_NAMESPACE
 using namespace GrandSearch::image_preview;
@@ -17,11 +20,12 @@ ImagePreviewPlugin::ImagePreviewPlugin(QObject *parent)
     : QObject (parent)
     , PreviewPlugin()
 {
-
+    qCDebug(logImagePreview) << "ImagePreviewPlugin created";
 }
 
 ImagePreviewPlugin::~ImagePreviewPlugin()
 {
+    qCDebug(logImagePreview) << "ImagePreviewPlugin destroyed";
     if (m_imageView) {
         m_imageView->deleteLater();
         m_imageView = nullptr;
@@ -31,23 +35,44 @@ ImagePreviewPlugin::~ImagePreviewPlugin()
 void ImagePreviewPlugin::init(QObject *proxyInter)
 {
     Q_UNUSED(proxyInter)
+    qCDebug(logImagePreview) << "ImagePreviewPlugin initialized";
 }
 
 bool ImagePreviewPlugin::previewItem(const ItemInfo &item)
 {
     const QString path = item.value(PREVIEW_ITEMINFO_ITEM);
     const QString type = item.value(PREVIEW_ITEMINFO_TYPE);
+    m_matchedContext = item.value(PREVIEW_ITEMINFO_MATCHEDCONTEXT);
 
-    if (!m_imageView)
+    // Get keywords for highlighting
+    QStringList keywords;
+    QString keywordsStr = item.value(PREVIEW_ITEMINFO_KEYWORDS);
+    if (!keywordsStr.isEmpty()) {
+        keywords = keywordsStr.split(":", Qt::SkipEmptyParts);
+    }
+
+    qCDebug(logImagePreview) << "Previewing image - Path:" << path << "Type:" << type
+                             << "Has matched context:" << !m_matchedContext.isEmpty()
+                             << "Keywords count:" << keywords.size();
+    if (!m_imageView) {
         m_imageView = new ImageView();
+        qCDebug(logImagePreview) << "ImageView created";
+    }
 
-    m_imageView->loadImage(path, type);
+    m_imageView->loadImage(path, type, keywords);
+
+    // Set matched context if available - will show context instead of filename
+    m_imageView->setMatchedContext(m_matchedContext, keywords);
 
     // 尺寸
     auto dimension = m_imageView->sourceSize();
     QString dimensionStr("--");
-    if (dimension.isValid())
+    if (dimension.isValid()) {
         dimensionStr = QString("%1*%2").arg(dimension.width()).arg(dimension.height());
+        qCDebug(logImagePreview) << "Image dimensions:" << dimensionStr;
+    } else {
+        qCWarning(logImagePreview) << "Unable to determine image dimensions";
+    }
 
     DetailTagInfo tagInfos;
     tagInfos.insert(DetailInfoProperty::Text, QVariant(tr("Dimensions:")));
@@ -104,7 +129,7 @@ bool ImagePreviewPlugin::previewItem(const ItemInfo &item)
     m_detailInfos.push_back(detailInfo);
 
     // 修改时间
-    auto time = fileInfo.lastModified();
+    auto time = CommonTools::getFileModifiedTime(path);
 
     tagInfos.clear();
     tagInfos.insert(DetailInfoProperty::Text, QVariant(tr("Time modified:")));
@@ -118,6 +143,7 @@ bool ImagePreviewPlugin::previewItem(const ItemInfo &item)
     m_detailInfos.push_back(detailInfo);
 
     m_item = item;
+    qCDebug(logImagePreview) << "Image preview completed successfully - Path:" << path;
     return true;
 }
 
@@ -133,6 +159,7 @@ QWidget *ImagePreviewPlugin::contentWidget() const
 
 bool ImagePreviewPlugin::stopPreview()
 {
+    qCDebug(logImagePreview) << "Stopping image preview";
     if (m_imageView)
         m_imageView->stopPreview();
     return true;

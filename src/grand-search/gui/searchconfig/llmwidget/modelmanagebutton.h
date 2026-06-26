@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2024 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -27,7 +27,11 @@ public:
 
 protected:
     void paintEvent(QPaintEvent* e) Q_DECL_OVERRIDE;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void enterEvent(QEnterEvent *event) override;
+#else
     void enterEvent(QEvent *event) override;
+#endif
     void leaveEvent(QEvent *event) override;
     void showEvent(QShowEvent *event) override;
 

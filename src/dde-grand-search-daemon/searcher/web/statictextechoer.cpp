@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -7,12 +7,16 @@
 #include "statictextworker.h"
 
 #include <QDebug>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(logDaemon)
 
 using namespace GrandSearch;
 
-StaticTextEchoer::StaticTextEchoer(QObject *parent): Searcher(parent)
+StaticTextEchoer::StaticTextEchoer(QObject *parent)
+    : Searcher(parent)
 {
-
+    qCDebug(logDaemon) << "StaticTextEchoer constructor";
 }
 
 QString StaticTextEchoer::name() const
@@ -27,17 +31,19 @@ bool StaticTextEchoer::isActive() const
 
 bool StaticTextEchoer::activate()
 {
+    qCDebug(logDaemon) << "StaticTextEchoer activate called - Not supported for this searcher type";
     return false;
 }
 
 ProxyWorker *StaticTextEchoer::createWorker() const
 {
+    qCDebug(logDaemon) << "Creating StaticTextWorker";
     return new StaticTextWorker(name());
 }
 
 bool StaticTextEchoer::action(const QString &action, const QString &item)
 {
     Q_UNUSED(item);
-    qWarning() << "no such action:" << action << ".";
+    qCWarning(logDaemon) << "Unsupported action requested:" << action;
     return false;
 }

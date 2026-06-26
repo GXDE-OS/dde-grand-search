@@ -1,15 +1,20 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "switchwidget.h"
 
 #include <DPalette>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <DGuiApplicationHelper>
+#else
 #include <DApplicationHelper>
+#endif
 
 #include <QPainter>
+#include <QLoggingCategory>
 
-#define ICONLABELSIZE   36
+Q_DECLARE_LOGGING_CATEGORY(logGrandSearch)
 
 DWIDGET_USE_NAMESPACE
 DGUI_USE_NAMESPACE
@@ -18,20 +23,27 @@ using namespace GrandSearch;
 SwitchWidget::SwitchWidget(const QString &title, QWidget *parent)
     : SwitchWidget(parent, new QLabel(title, parent))
 {
-
+    qCDebug(logGrandSearch) << "Creating SwitchWidget with title:" << title;
 }
 
 SwitchWidget::SwitchWidget(QWidget *parent, QWidget *leftWidget)
     : RoundedBackground (parent)
     , m_leftWidget(leftWidget)
 {
+    qCDebug(logGrandSearch) << "Creating SwitchWidget with custom left widget";
 
     m_iconLabel = new QLabel(this);
-    m_iconLabel->setFixedSize(ICONLABELSIZE, ICONLABELSIZE);
 
-    if (!m_leftWidget)
+    if (!m_leftWidget) {
         m_leftWidget = new QLabel(this);
+    }
     m_leftWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    
+    // 如果是 QLabel，设置自动换行
+    QLabel *label = qobject_cast<QLabel *>(m_leftWidget);
+    if (label) {
+        label->setWordWrap(true);
+    }
 
     m_switchBtn = new DSwitchButton(this);
 
@@ -42,7 +54,7 @@ SwitchWidget::SwitchWidget(QWidget *parent, QWidget *leftWidget)
     m_mainLayout->setSpacing(10);
     m_mainLayout->setContentsMargins(10, 0, 10, 0);
     m_mainLayout->addWidget(m_iconLabel);
-    m_mainLayout->addLayout(labelLayout, 0);
+    m_mainLayout->addLayout(labelLayout, 1);
     m_mainLayout->addWidget(m_switchBtn, 0, Qt::AlignVCenter);
     setLayout(m_mainLayout);
 
@@ -50,10 +62,13 @@ SwitchWidget::SwitchWidget(QWidget *parent, QWidget *leftWidget)
 
     setTopRound(true);
     setBottomRound(true);
+    qCDebug(logGrandSearch) << "SwitchWidget created successfully";
 }
 
 void SwitchWidget::setChecked(const bool checked)
 {
+    qCDebug(logGrandSearch) << "Setting switch state - Title:" << title()
+                            << "Checked:" << checked;
     m_switchBtn->blockSignals(true);
     m_switchBtn->setChecked(checked);
     m_switchBtn->blockSignals(false);
@@ -68,9 +83,13 @@ void SwitchWidget::setTitle(const QString &title)
 {
     QLabel *label = qobject_cast<QLabel *>(m_leftWidget);
     if (label) {
+        qCDebug(logGrandSearch) << "Setting switch title - Title:" << title;
         label->setText(title);
         label->setWordWrap(true);
+        label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         label->adjustSize();
+    } else {
+        qCWarning(logGrandSearch) << "Failed to set title - Left widget is not a QLabel";
     }
 }
 
@@ -86,11 +105,13 @@ QString SwitchWidget::title() const
 
 void SwitchWidget::setIconEnable(bool e)
 {
+    qCDebug(logGrandSearch) << "Setting icon visibility - Enabled:" << e;
     m_iconLabel->setVisible(e);
 }
 
 void SwitchWidget::setIcon(const QIcon &icon, const QSize &size)
 {
+    qCDebug(logGrandSearch) << "Setting switch icon - Size:" << size;
     m_iconLabel->setPixmap(icon.pixmap(size));
 
     update();

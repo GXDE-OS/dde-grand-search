@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -16,6 +16,9 @@
 
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(logGrandSearch)
 
 DWIDGET_USE_NAMESPACE
 DCORE_USE_NAMESPACE
@@ -24,6 +27,8 @@ using namespace GrandSearch;
 PlanWidget::PlanWidget(QWidget *parent)
     : DWidget(parent)
 {
+    qCDebug(logGrandSearch) << "Creating PlanWidget";
+
     m_groupLabel = new QLabel(tr("Search experience program"), this);
     m_groupLabel->adjustSize();
 
@@ -81,6 +86,8 @@ PlanWidget::PlanWidget(QWidget *parent)
 
     connect(m_switchWidget, &SwitchWidget::checkedChanged, this, &PlanWidget::onSwitchStateChanged);
     connect(DGuiApplicationHelper::instance(), &DGuiApplicationHelper::themeTypeChanged, this, &PlanWidget::updateIcons);
+
+    qCDebug(logGrandSearch) << "PlanWidget created successfully";
 }
 
 PlanWidget::~PlanWidget()
@@ -94,15 +101,15 @@ void PlanWidget::onSwitchStateChanged(const bool checked)
     SwitchWidget *switchWidget = static_cast<SwitchWidget *>(obj);
 
     if (switchWidget) {
+        qCDebug(logGrandSearch) << "Search experience program configuration changed - Enabled:" << checked;
         SearchConfig::instance()->setConfig(GRANDSEARCH_PLAN_GROUP, GRANDSEARCH_PLAN_EXPERIENCE, checked);
     }
 }
 
 void PlanWidget::updateIcons()
 {
-    QString suffix = Utils::iconThemeSuffix();
-    QIcon icon = QIcon(QString(":/icons/%1%2.svg").arg(m_displayIcon).arg(suffix));
-    m_switchWidget->setIcon(icon, QSize(SWITCHWIDGETICONSIZE, SWITCHWIDGETICONSIZE));
+    const auto &icon = QIcon::fromTheme(m_displayIcon);
+    m_switchWidget->setIcon(icon, { SWITCHWIDGETICONSIZE, SWITCHWIDGETICONSIZE });
 
     update();
 }
