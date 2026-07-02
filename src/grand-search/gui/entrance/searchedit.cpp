@@ -28,7 +28,9 @@ DWIDGET_USE_NAMESPACE
 using namespace GrandSearch;
 
 static constexpr int DelayResponseTime = 50;
-static constexpr int AppIconSize = 32;
+// 修复搜索框右侧应用图标太大的问题
+// static constexpr int AppIconSize = 32;
+static constexpr int AppIconSize = 24;
 static constexpr int SearchIconSize = 20;
 
 IconButton::IconButton(QWidget *parent)
