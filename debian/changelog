@@ -1,3 +1,9 @@
+dde-grand-search (6.0.39gxde1) UNRELEASED; urgency=medium
+
+  * 修复搜索框右侧应用图标太大的问题
+
+ -- gfdgd_xi <3025613752@qq.com>  Thu, 02 Jul 2026 23:07:29 +0800
+
 dde-grand-search (6.0.39) unstable; urgency=medium
 
   * fix: fix app icon scaling on high DPI displays
