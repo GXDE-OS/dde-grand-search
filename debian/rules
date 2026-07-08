@@ -2,7 +2,7 @@
 
 include /usr/share/dpkg/default.mk
 
-export QT_SELECT = 5
+# export QT_SELECT = 5
 
 # 检测当前安装的Qt版本，优先使用Qt6，否则使用Qt5
 define detect_qt_version
