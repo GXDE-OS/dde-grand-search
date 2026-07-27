@@ -30,7 +30,7 @@ Build-Depends: debhelper (>= 9),
  libdeepin-service-framework-dev (>1.0.9),
  gxde-desktop-base,
  libgsettings-qt-dev,
- liblayer-shell-qt-dev,
+ liblayershellqtinterface-dev,
  libwayland-dev,
 Standards-Version: 3.9.8
 Homepage: http://www.deepin.org/
