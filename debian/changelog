@@ -1,9 +1,9 @@
-dde-grand-search (6.0.39gxde1) UNRELEASED; urgency=medium
+dde-grand-search (6.0.39gxde2) UNRELEASED; urgency=medium
 
   * 修复搜索框右侧应用图标太大的问题
   * 修复 Wayland 下窗口显示不在屏幕中间的问题
 
- -- gfdgd_xi <3025613752@qq.com>  Fri, 24 Jul 2026 10:00:00 +0800
+ -- gfdgd_xi <3025613752@qq.com>  Mon, 27 Jul 2026 17:15:27 +0800
 
 dde-grand-search (6.0.39) unstable; urgency=medium
 
