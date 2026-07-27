@@ -9,6 +9,10 @@
 
 #include <QScopedPointer>
 
+#ifdef HAS_LAYER_SHELL
+#include <LayerShellQt/window.h>
+#endif
+
 namespace GrandSearch {
 
 class MainWindowPrivate;
@@ -52,6 +56,7 @@ protected:
     virtual void showEvent(QShowEvent *event) Q_DECL_OVERRIDE;
     virtual void hideEvent(QHideEvent *event) Q_DECL_OVERRIDE;
     virtual void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE;
+    virtual void moveEvent(QMoveEvent *event) Q_DECL_OVERRIDE;
 
 signals:
     // 显示状态改变信号

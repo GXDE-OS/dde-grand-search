@@ -41,6 +41,7 @@ find_package(${QT_NS} COMPONENTS
     Network
 REQUIRED)
 find_package(dfm${DTK_VERSION_MAJOR}-search REQUIRED)
+find_package(LayerShellQt QUIET)
 
 set(DBUSSRC
     # dbus接口
@@ -292,6 +293,11 @@ target_link_libraries(${BIN_NAME} PRIVATE
     ${GIO_LIB_LIBRARIES}
     dfm${DTK_VERSION_MAJOR}-search
 )
+
+if (LayerShellQt_FOUND)
+    target_link_libraries(${BIN_NAME} PRIVATE LayerShellQt::Interface)
+    target_compile_definitions(${BIN_NAME} PRIVATE HAS_LAYER_SHELL)
+endif()
 
 set(SRCS_SETTING
     setting_main.cpp

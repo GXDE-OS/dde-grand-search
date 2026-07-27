@@ -29,7 +29,9 @@ Build-Depends: debhelper (>= 9),
  libboost-filesystem-dev,
  libdeepin-service-framework-dev (>1.0.9),
  gxde-desktop-base,
- libgsettings-qt-dev
+ libgsettings-qt-dev,
+ liblayer-shell-qt-dev,
+ libwayland-dev,
 Standards-Version: 3.9.8
 Homepage: http://www.deepin.org/
 

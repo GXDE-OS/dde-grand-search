@@ -24,6 +24,10 @@
 #include <QKeyEvent>
 #include <QLoggingCategory>
 
+#ifdef HAS_LAYER_SHELL
+#include <LayerShellQt/window.h>
+#endif
+
 Q_DECLARE_LOGGING_CATEGORY(logGrandSearch)
 
 DWIDGET_USE_NAMESPACE
@@ -39,6 +43,43 @@ MainWindowPrivate::MainWindowPrivate(MainWindow *parent)
     qCDebug(logGrandSearch) << "Initializing MainWindow private data";
     m_handleVisibility = new HandleVisibility(q_p, q_p);
 }
+
+#ifdef HAS_LAYER_SHELL
+void MainWindowPrivate::ensureLayerShellConfigured()
+{
+    if (!Utils::isWayland())
+        return;
+
+    q_p->setAttribute(Qt::WA_NativeWindow, true);
+    q_p->winId();
+
+    QWindow *window = q_p->windowHandle();
+    if (!window) {
+        qCDebug(logGrandSearch) << "LayerShell: no QWindow";
+        return;
+    }
+
+    if (qApp->primaryScreen())
+        window->setScreen(qApp->primaryScreen());
+
+    if (!m_layerShellWindow) {
+        m_layerShellWindow = LayerShellQt::Window::get(window);
+        qCDebug(logGrandSearch) << "LayerShell: Created LayerShellQt::Window:" << m_layerShellWindow;
+    }
+
+    if (m_layerShellWindow) {
+        m_layerShellWindow->setAnchors(LayerShellQt::Window::Anchors(
+            LayerShellQt::Window::AnchorTop | LayerShellQt::Window::AnchorLeft));
+        m_layerShellWindow->setLayer(LayerShellQt::Window::LayerOverlay);
+        m_layerShellWindow->setExclusiveZone(-1);
+        m_layerShellWindow->setMargins(QMargins());
+        m_layerShellWindow->setKeyboardInteractivity(
+            LayerShellQt::Window::KeyboardInteractivityOnDemand);
+        m_layerShellWindow->setCloseOnDismissed(false);
+        qCDebug(logGrandSearch) << "LayerShell: Configured successfully";
+    }
+}
+#endif
 
 MainWindow::MainWindow(QWidget *parent)
     : DBlurEffectWidget(parent)
@@ -153,7 +194,22 @@ void MainWindow::onGeometryChanged(const QRect &geometry)
     sHeight = geometry.y() + sHeight/4;
     qCDebug(logGrandSearch) << "Window geometry changed - Screen:" << geometry
                             << "Moving window to:" << QPoint(sWidth, sHeight);
+
+#ifdef HAS_LAYER_SHELL
+    if (Utils::isWayland()) {
+        d_p->m_targetPos = QPoint(sWidth, sHeight);
+        if (d_p->m_layerShellWindow) {
+            d_p->m_layerShellWindow->setMargins(QMargins(sWidth, sHeight, 0, 0));
+            return;
+        }
+    }
+    else {
+        move(sWidth, sHeight);
+    }
+#else
     move(sWidth, sHeight);
+#endif
+
 }
 
 void MainWindow::onHideExhitionWidget()
@@ -299,6 +355,16 @@ void MainWindow::showEvent(QShowEvent *event)
     qCDebug(logGrandSearch) << "MainWindow show event";
     QMetaObject::invokeMethod(this, "visibleChanged", Qt::QueuedConnection, Q_ARG(bool, true));
 
+#ifdef HAS_LAYER_SHELL
+    if (Utils::isWayland()) {
+        d_p->ensureLayerShellConfigured();
+        if (d_p->m_layerShellWindow) {
+            qCDebug(logGrandSearch) << "LayerShell: showEvent - Setting margins to" << QMargins(d_p->m_targetPos.x(), d_p->m_targetPos.y(), 0, 0);
+            d_p->m_layerShellWindow->setMargins(QMargins(d_p->m_targetPos.x(), d_p->m_targetPos.y(), 0, 0));
+        }
+    }
+#endif
+
     // 已禁用窗口管理器，在窗口被显示后，需要激活该窗口
     QTimer::singleShot(1, this, &MainWindow::activeMainWindow);
 
@@ -315,6 +381,17 @@ void MainWindow::hideEvent(QHideEvent *event)
     d_p->m_handleVisibility->registerRegion(false);
 
     return DBlurEffectWidget::hideEvent(event);
+}
+
+void MainWindow::moveEvent(QMoveEvent *event)
+{
+    DBlurEffectWidget::moveEvent(event);
+
+#ifdef HAS_LAYER_SHELL
+    if (Utils::isWayland() && d_p->m_layerShellWindow) {
+        d_p->m_layerShellWindow->setMargins(QMargins(event->pos().x(), event->pos().y(), 0, 0));
+    }
+#endif
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

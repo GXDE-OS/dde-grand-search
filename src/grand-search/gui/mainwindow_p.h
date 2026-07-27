@@ -9,6 +9,10 @@
 
 #include <QWidget>
 
+#ifdef HAS_LAYER_SHELL
+#include <LayerShellQt/window.h>
+#endif
+
 
 DWIDGET_BEGIN_NAMESPACE
 class DLabel;
@@ -35,6 +39,11 @@ public:
     QVBoxLayout *m_mainLayout = nullptr;
     QueryController *m_queryController = nullptr;
     MatchController *m_matchController = nullptr;
+#ifdef HAS_LAYER_SHELL
+    LayerShellQt::Window *m_layerShellWindow = nullptr;
+    void ensureLayerShellConfigured();
+    QPoint m_targetPos;
+#endif
 };
 
 }
