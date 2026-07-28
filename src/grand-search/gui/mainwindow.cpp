@@ -261,6 +261,7 @@ void MainWindow::initUI()
     if (Utils::isWayland()) {
         setWindowFlags(Qt::BypassWindowManagerHint | Qt::WindowStaysOnTopHint | Qt::Tool);
         setAttribute(Qt::WA_QuitOnClose);
+        DGuiApplicationHelper::instance()->setPaletteType(DGuiApplicationHelper::ColorType::DarkType);
     } else {
         // 在Qt5.11版本、x11环境下，同时设置BypassWindowManagerHint与Tool属性之后，键盘切换大小写将会导致程序的激活状态发生改变。
         setWindowFlags(Qt::BypassWindowManagerHint | Qt::WindowStaysOnTopHint);
