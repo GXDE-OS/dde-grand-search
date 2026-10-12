@@ -1,0 +1,39 @@
+# Maintainer: CharOfString <root@charofstring.cc>
+pkgname=dde-grand-search-git
+pkgver=6.0.39gxde3
+pkgrel=1
+pkgdesc='System-wide desktop search for GXDE'
+arch=('x86_64' 'aarch64')
+url="https://github.com/GXDE-OS/dde-grand-search"
+license=('GPL-3.0-or-later')
+depends=('util-dfm-git' 'deepin-pdfium-git' 'deepin-service-manager-git' 'dtk6core-git' 'dtk6gui-git'
+         'dtk6widget-git' 'dtk6declarative-git' 'qt6-base' 'qt6-declarative' 'qt6-5compat'
+         'gsettings-qt5' 'layer-shell-qt' 'wayland' 'glib2' 'taglib' 'ffmpeg' 'ffmpegthumbnailer'
+         'icu' 'libjpeg-turbo' 'lucene++' 'dconf' 'libgcc' 'libstdc++' 'glibc')
+optdepends=('gxde-dock-git: dock plugin')
+makedepends=('git' 'cmake' 'ninja' 'qt6-tools' 'boost' 'gxde-dock-git' 'gxde-desktop-base-git')
+provides=('dde-grand-search' 'deepin-grand-search')
+conflicts=('dde-grand-search' 'deepin-grand-search')
+source=()
+sha512sums=()
+
+# 直接使用 PKGBUILD 所在的 git 仓库作为源码 ・ Build from the git checkout this PKGBUILD lives in.
+_srcroot() {
+  git -C "$startdir" rev-parse --show-toplevel
+}
+
+build() {
+  # 与 debian/rules 相同；BUILD_OS_VERSION 由 CMake 从 gxde-desktop-base 的 /etc/os-version 读取
+  # Same as debian/rules; CMake reads BUILD_OS_VERSION from the /etc/os-version
+  # shipped by gxde-desktop-base.
+  cmake -B build -S "$(_srcroot)" -GNinja \
+    -DCMAKE_BUILD_TYPE=None \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DVERSION="$pkgver"
+  ninja -C build
+}
+
+package() {
+  DESTDIR="$pkgdir" ninja -C build install
+}
