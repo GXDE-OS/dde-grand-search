@@ -133,6 +133,7 @@ option(OPT_ENABLE_AI_SEARCH "Enable AI search feature" OFF)
 
 add_subdirectory(src/grand-search)
 add_subdirectory(src/dde-grand-search-daemon)
+add_subdirectory(src/convert-search-plugin)
 add_subdirectory(src/grand-search-dock-plugin)
 add_subdirectory(src/preview-plugin)
 add_subdirectory(src/tools/semanticparser)
