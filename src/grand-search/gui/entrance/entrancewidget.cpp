@@ -40,6 +40,12 @@ void EntranceWidget::showLabelAppIcon(bool visible)
     d_p->m_searchEdit->setAppIconVisible(visible);
 }
 
+void EntranceWidget::setCalculatorResult(const QString &value)
+{
+    Q_ASSERT(d_p->m_searchEdit);
+    d_p->m_searchEdit->setCalculatorResult(value);
+}
+
 bool EntranceWidget::event(QEvent *event)
 {
     if (event->type() == QEvent::FocusIn) {

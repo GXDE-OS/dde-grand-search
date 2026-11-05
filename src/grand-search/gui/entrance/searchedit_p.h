@@ -25,6 +25,7 @@ class SearchEditPrivate
     void showContextMenu(const QPoint &pos);
     void delayTextChanged();
     void notifyTextChanged();
+    void updateCalcResultLabel();
 
     SearchEdit *q = nullptr;
 
@@ -32,6 +33,7 @@ class SearchEditPrivate
     QWidget *m_iconWidget = nullptr;
     QLabel *m_placeholderLabel = nullptr;
     QLabel *m_appIconLabel = nullptr;
+    QLabel *m_calcResultLabel = nullptr;
     DTK_WIDGET_NAMESPACE::DIconButton *m_clearButton = nullptr;
     QAction *m_searchAction = nullptr;
     QAction *m_clearAction = nullptr;
@@ -44,6 +46,7 @@ class SearchEditPrivate
     QString m_placeHolder;
     QString m_placeholderText;
     QString m_appIconName;
+    QString m_calcResult;
 
     friend class SearchEdit;
 };

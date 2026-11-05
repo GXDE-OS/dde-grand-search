@@ -534,6 +534,11 @@
 <context>
     <name>GrandSearch::SearchEdit</name>
     <message>
+        <location filename="../src/grand-search/gui/entrance/searchedit.cpp" line="175"/>
+        <source>Click to copy the result</source>
+        <translation>点击复制结果</translation>
+    </message>
+    <message>
         <location filename="../src/grand-search/gui/entrance/searchedit.cpp" line="121"/>
         <source>Search</source>
         <translation>搜索</translation>
@@ -711,6 +716,21 @@
 </context>
 <context>
     <name>QObject</name>
+    <message>
+        <location filename="../src/grand-search/gui/datadefine.h" line="26"/>
+        <source>Calculator</source>
+        <translation>计算器</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/business/calculator/calculator.cpp" line="452"/>
+        <source>Copy the result</source>
+        <translation>复制结果</translation>
+    </message>
+    <message>
+        <location filename="../src/grand-search/business/calculator/calculator.cpp" line="518"/>
+        <source>Cannot compute</source>
+        <translation>无法计算</translation>
+    </message>
     <message>
         <location filename="../src/grand-search/gui/datadefine.h" line="25"/>
         <source>Best match</source>

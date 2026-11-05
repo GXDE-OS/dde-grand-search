@@ -210,6 +210,9 @@ set(BUSINESSSRC
     business/matchresult/matchcontroller_p.h
     business/matchresult/matchcontroller.h
     business/matchresult/matchcontroller.cpp
+    # 搜索框内置计算器
+    business/calculator/calculator.h
+    business/calculator/calculator.cpp
     # 配置读写
     business/config/searchconfig.cpp
     business/config/searchconfig.h

@@ -6,6 +6,7 @@
 #include "matchcontroller.h"
 #include "gui/datadefine.h"
 #include "business/config/searchconfig.h"
+#include "business/calculator/calculator.h"
 #include "global/builtinsearch.h"
 #include "global/searchconfigdefine.h"
 #include "utils/utils.h"
@@ -17,6 +18,31 @@
 Q_DECLARE_LOGGING_CATEGORY(logGrandSearch)
 
 using namespace GrandSearch;
+
+namespace {
+
+// 表达式已由前端实时计算并置顶展示，过滤掉后台转换插件返回的重复计算卡片
+void removeDuplicateCalcResults(MatchedItemMap &items)
+{
+    for (auto it = items.begin(); it != items.end(); ) {
+        MatchedItems kept;
+        for (const MatchedItem &item : it.value()) {
+            if (item.type.startsWith(QLatin1String("convert/calc"))
+                || item.type == QLatin1String("convert/help-hint"))
+                continue;
+            kept.append(item);
+        }
+
+        if (kept.isEmpty())
+            it = items.erase(it);
+        else {
+            it.value() = kept;
+            ++it;
+        }
+    }
+}
+
+} // namespace
 
 MatchControllerPrivate::MatchControllerPrivate(MatchController *parent)
     : q_p(parent)
@@ -64,6 +90,9 @@ void MatchControllerPrivate::onMatched(const QString &missionId)
 
     MatchedItemMap items;
     stream >> items;
+
+    if (Calculator::isExpression(m_missionContent))
+        removeDuplicateCalcResults(items);
 
     // 首次收到数据
     if (m_missionIdChanged) {

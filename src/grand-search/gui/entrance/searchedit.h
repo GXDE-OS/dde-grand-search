@@ -12,6 +12,7 @@
 
 class QLineEdit;
 class QIcon;
+class QResizeEvent;
 
 namespace GrandSearch {
 
@@ -56,6 +57,10 @@ public:
 
     void setFocus();
 
+public slots:
+    // 在输入框内实时显示计算结果，传入空串时隐藏；点击标签可复制结果
+    void setCalculatorResult(const QString &value);
+
 signals:
     void debouncedTextChanged(const QString &text);
 
@@ -68,6 +73,7 @@ signals:
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
     bool event(QEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
 private:
     QScopedPointer<SearchEditPrivate> d;

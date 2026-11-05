@@ -34,6 +34,8 @@ extern "C" {
 #include <QDateTime>
 #include <QIcon>
 #include <QApplication>
+#include <QGuiApplication>
+#include <QClipboard>
 #include <QLoggingCategory>
 
 Q_DECLARE_LOGGING_CATEGORY(logGrandSearch)
@@ -761,6 +763,17 @@ bool Utils::isResultFromBuiltSearch(const MatchedItem &item)
 bool Utils::openMatchedItem(const MatchedItem &item)
 {
     qCDebug(logGrandSearch) << "Opening matched item - Searcher:" << item.searcher << "Item:" << item.item;
+
+    // 本地实时计算的结果：点击/回车把数值复制到剪贴板，不需要通知后台插件
+    if (item.searcher == GRANDSEARCH_CLASS_CALCULATOR) {
+        const QString value = item.extra.toHash().value(GRANDSEARCH_PROPERTY_CALC_VALUE).toString();
+        if (value.isEmpty())
+            return false;
+
+        QGuiApplication::clipboard()->setText(value);
+        qCDebug(logGrandSearch) << "Calculator result copied to clipboard:" << value;
+        return true;
+    }
 
     if (Utils::isResetSearcher(item.searcher)) {
         QDateTime time = QDateTime::currentDateTime();

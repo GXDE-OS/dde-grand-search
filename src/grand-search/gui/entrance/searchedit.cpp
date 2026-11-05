@@ -21,6 +21,8 @@
 #include <QGuiApplication>
 #include <QClipboard>
 #include <QKeyEvent>
+#include <QMouseEvent>
+#include <QFontMetrics>
 #include <QStyleOption>
 #include <QToolButton>
 
@@ -164,6 +166,21 @@ void SearchEditPrivate::init()
     m_clearAction->setVisible(false);
     m_lineEdit->addAction(m_clearAction, QLineEdit::TrailingPosition);
 
+    // 实时计算结果：悬浮在输入框右侧，不加入布局，避免改变输入框宽度
+    m_calcResultLabel = new QLabel(q);
+    m_calcResultLabel->setObjectName("CalculatorResultLabel");
+    m_calcResultLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_calcResultLabel->setStyleSheet(
+        QStringLiteral("QLabel { background: transparent; color: palette(highlight); }"));
+    QFont resultFont = DFontSizeManager::instance()->get(DFontSizeManager::T5,
+                                                         m_calcResultLabel->font());
+    resultFont.setBold(true);
+    m_calcResultLabel->setFont(resultFont);
+    m_calcResultLabel->setCursor(Qt::PointingHandCursor);
+    m_calcResultLabel->setToolTip(SearchEdit::tr("Click to copy the result"));
+    m_calcResultLabel->installEventFilter(q);
+    m_calcResultLabel->hide();
+
     // 主布局
     QHBoxLayout *mainLayout = new QHBoxLayout(q);
     mainLayout->setSpacing(6 / q->devicePixelRatio());
@@ -244,6 +261,31 @@ void SearchEditPrivate::notifyTextChanged()
 {
     const QString &text = m_lineEdit->text().trimmed();
     Q_EMIT q->debouncedTextChanged(text);
+}
+
+void SearchEditPrivate::updateCalcResultLabel()
+{
+    if (!m_calcResultLabel)
+        return;
+
+    if (m_calcResult.isEmpty()) {
+        m_lineEdit->setTextMargins(0, 0, 0, 0);
+        return;
+    }
+
+    const QFontMetrics metrics(m_calcResultLabel->font());
+    const int wanted = qMin(metrics.horizontalAdvance(m_calcResultLabel->text()) + 12, 260);
+    const int lineRight = m_lineEdit->geometry().right();
+    const int clearLeft = m_clearButton->isVisible() ? m_clearButton->x() : lineRight;
+    const int right = qMin(clearLeft, lineRight) - 8;
+    const int left = qMax(m_lineEdit->x() + 48, right - wanted);
+    if (right <= left)
+        return;   // 布局尚未完成，等待 resizeEvent 重新计算
+
+    m_calcResultLabel->setGeometry(left, m_lineEdit->y(), right - left, m_lineEdit->height());
+
+    // 给结果标签留出空间，避免输入的表达式与结果重叠
+    m_lineEdit->setTextMargins(0, 0, lineRight - left + 8, 0);
 }
 
 SearchEdit::SearchEdit(QWidget *parent)
@@ -363,8 +405,37 @@ void SearchEdit::setFocus()
     d->m_lineEdit->setFocus();
 }
 
+void SearchEdit::setCalculatorResult(const QString &value)
+{
+    if (d->m_calcResult == value)
+        return;
+
+    d->m_calcResult = value;
+    if (value.isEmpty()) {
+        d->m_calcResultLabel->clear();
+        d->m_calcResultLabel->hide();
+    } else {
+        d->m_calcResultLabel->setText(QStringLiteral("= ") + value);
+        d->m_calcResultLabel->show();
+    }
+    d->updateCalcResultLabel();
+}
+
+void SearchEdit::resizeEvent(QResizeEvent *event)
+{
+    QWidget::resizeEvent(event);
+    d->updateCalcResultLabel();
+}
+
 bool SearchEdit::eventFilter(QObject *watched, QEvent *event)
 {
+    if (watched == d->m_calcResultLabel && event->type() == QEvent::MouseButtonRelease) {
+        auto *mouseEvent = static_cast<QMouseEvent *>(event);
+        if (mouseEvent->button() == Qt::LeftButton && !d->m_calcResult.isEmpty())
+            QGuiApplication::clipboard()->setText(d->m_calcResult);
+        return true;
+    }
+
     if (watched == d->m_lineEdit) {
         switch (event->type()) {
         case QEvent::FocusIn:

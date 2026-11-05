@@ -11,6 +11,7 @@
 #include "gui/handlevisibility/handlevisibility.h"
 #include "business/query/querycontroller.h"
 #include "business/matchresult/matchcontroller.h"
+#include "business/calculator/calculator.h"
 
 #include <DApplication>
 #include <DLabel>
@@ -252,7 +253,22 @@ void MainWindow::onMissionChanged(const QString &missionId, const QString &missi
     } else {
         // 搜索关键词改变，传播到 ExhibitionWidget 以管理高亮任务
         d_p->m_exhibitionWidget->setSearchKeyword(missionContent);
+        // clearData() 会清空所有分组，这里重新注入本地实时计算的结果
+        d_p->m_exhibitionWidget->setCalculatorItems(Calculator::matchedItems(d_p->m_calcResult));
     }
+}
+
+void MainWindow::onSearchTextChanged(const QString &txt)
+{
+    d_p->m_calcResult = Calculator::evaluate(txt);
+
+    // 输入框内联结果：只有成功求值才显示，输入不完整时保持安静
+    d_p->m_entranceWidget->setCalculatorResult(d_p->m_calcResult.hasValue
+                                                   ? d_p->m_calcResult.value
+                                                   : QString());
+
+    // 结果列表顶部同步展示可直接复制的结果项
+    d_p->m_exhibitionWidget->setCalculatorItems(Calculator::matchedItems(d_p->m_calcResult));
 }
 
 void MainWindow::initUI()
@@ -313,6 +329,9 @@ void MainWindow::initConnect()
 
     // 监控主屏改变信号，及时更新窗口位置
     connect(qApp, &QGuiApplication::primaryScreenChanged, this, &MainWindow::onPrimaryScreenChanged);
+
+    // 计算器结果在界面本地求解，绕过 D-Bus 与结果缓存等待，输入后即时展示
+    connect(d_p->m_entranceWidget, &EntranceWidget::searchTextChanged, this, &MainWindow::onSearchTextChanged);
 
     connect(d_p->m_entranceWidget, &EntranceWidget::sigSelectPreviousItem, d_p->m_exhibitionWidget, &ExhibitionWidget::onSelectPreviousItem);
     connect(d_p->m_entranceWidget, &EntranceWidget::sigSelectNextItem, d_p->m_exhibitionWidget, &ExhibitionWidget::onSelectNextItem);

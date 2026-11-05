@@ -14,6 +14,9 @@
 #define GRANDSEARCH_CLASS_OCR_TEXT "com.deepin.dde-grand-search.ocr-text"
 #define GRANDSEARCH_CLASS_FILE_FULLTEXT "com.deepin.dde-grand-search.file-fulltext"
 
+// 前端内置计算器搜索项：结果在界面本地实时计算，不经过后台搜索服务
+#define GRANDSEARCH_CLASS_CALCULATOR "com.deepin.dde-grand-search.calculator"
+
 // AI搜索子项
 #define GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC_ANALYSIS GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC".analysis"
 #define GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC_VECTOR GRANDSEARCH_CLASS_GENERALFILE_SEMANTIC".vector"
@@ -21,6 +24,7 @@
 
 // 搜索项所属组
 #define GRANDSEARCH_GROUP_BEST               "com.deepin.dde-grand-search.group.best-match"
+#define GRANDSEARCH_GROUP_CALCULATOR         "com.deepin.dde-grand-search.group.calculator"
 #define GRANDSEARCH_GROUP_APP                "com.deepin.dde-grand-search.group.application"
 #define GRANDSEARCH_GROUP_SETTING            "com.deepin.dde-grand-search.group.dde-control-center-setting"
 #define GRANDSEARCH_GROUP_WEB                "com.deepin.dde-grand-search.group.web"
@@ -63,6 +67,9 @@
 
 // 匹配的关键词列表
 #define GRANDSEARCH_PROPERTY_ITEM_KEYWORDS          "itemKeywords"
+
+// 计算器结果项可复制到剪贴板的文本
+#define GRANDSEARCH_PROPERTY_CALC_VALUE             "calcValue"
 
 /****************** 扩展数据 END ******************************/
 

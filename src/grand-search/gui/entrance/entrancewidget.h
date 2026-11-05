@@ -22,6 +22,9 @@ public:
 
     void showLabelAppIcon(bool visible);
 
+    // 在输入框内显示/隐藏实时计算结果
+    void setCalculatorResult(const QString &value);
+
 protected:
     bool event(QEvent *event) Q_DECL_OVERRIDE;
     void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;

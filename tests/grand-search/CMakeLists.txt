@@ -94,6 +94,7 @@ target_link_libraries(${BIN_NAME} PRIVATE
     ${GTEST_LIBRARIES}
     ${QT_NS}::Test
     ${GIO_LIB_LIBRARIES}
+    dfm${DTK_VERSION_MAJOR}-search
     -lpthread
 )
 

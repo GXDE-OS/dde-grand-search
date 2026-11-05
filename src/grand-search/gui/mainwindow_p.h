@@ -6,6 +6,7 @@
 #define MAINWINDOW_P_H
 
 #include "mainwindow.h"
+#include "business/calculator/calculator.h"
 
 #include <QWidget>
 
@@ -39,6 +40,7 @@ public:
     QVBoxLayout *m_mainLayout = nullptr;
     QueryController *m_queryController = nullptr;
     MatchController *m_matchController = nullptr;
+    Calculator::Result m_calcResult;
 #ifdef HAS_LAYER_SHELL
     LayerShellQt::Window *m_layerShellWindow = nullptr;
     void ensureLayerShellConfigured();

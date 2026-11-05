@@ -51,7 +51,7 @@ void MatchWidgetPrivate::setGroupIcon(GroupWidget *wid)
 MatchWidget::MatchWidget(QWidget *parent)
     : DWidget(parent), d_p(new MatchWidgetPrivate(this))
 {
-    m_groupHashShowOrder << GRANDSEARCH_GROUP_BEST << GRANDSEARCH_GROUP_FILE_INFERENCE
+    m_groupHashShowOrder << GRANDSEARCH_GROUP_CALCULATOR << GRANDSEARCH_GROUP_BEST << GRANDSEARCH_GROUP_FILE_INFERENCE
                          << GRANDSEARCH_GROUP_APP << GRANDSEARCH_GROUP_SETTING
                          << GRANDSEARCH_GROUP_WEB << GRANDSEARCH_GROUP_FILE_VIDEO
                          << GRANDSEARCH_GROUP_FILE_AUDIO << GRANDSEARCH_GROUP_FILE_OCR
@@ -118,6 +118,26 @@ void MatchWidget::appendMatchedData(const MatchedItemMap &matchedData)
     }
 
     // 用户未手动切换选中项时，确保选中当前结果中的第一个
+    if (!m_customSelected) {
+        clearSelectItem();
+        selectFirstItem();
+    }
+}
+
+void MatchWidget::setCalculatorItems(const MatchedItemMap &items)
+{
+    // 计算器结果随输入实时变化：先移除上一帧的结果，再重新追加，
+    // 避免表达式改变后旧的数值残留在列表中。
+    if (GroupWidget *group = m_groupWidgetMap.value(GRANDSEARCH_GROUP_CALCULATOR, nullptr))
+        group->clear();
+
+    if (!items.isEmpty()) {
+        appendMatchedData(items);
+        return;
+    }
+
+    sortVislibleGroupList();
+    reLayout();
     if (!m_customSelected) {
         clearSelectItem();
         selectFirstItem();

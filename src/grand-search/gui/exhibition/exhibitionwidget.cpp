@@ -62,6 +62,12 @@ void ExhibitionWidget::setSearchKeyword(const QString &keyword)
     m_matchWidget->setSearchKeyword(keyword);
 }
 
+void ExhibitionWidget::setCalculatorItems(const MatchedItemMap &items)
+{
+    Q_ASSERT(m_matchWidget);
+    m_matchWidget->setCalculatorItems(items);
+}
+
 void ExhibitionWidget::onSelectNextItem()
 {
     if (this->isHidden()) {

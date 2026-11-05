@@ -27,6 +27,8 @@ public:
 
 public slots:
     void appendMatchedData(const MatchedItemMap &matchedData);//追加显示匹配数据
+    // 替换计算器分组的内容（实时计算，不经过后台搜索）
+    void setCalculatorItems(const MatchedItemMap &items);
     void clearMatchedData();
     void onSearchCompleted();
     void onShowMore();

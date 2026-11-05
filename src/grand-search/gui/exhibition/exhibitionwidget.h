@@ -37,6 +37,9 @@ public:
      */
     void setSearchKeyword(const QString &keyword);
 
+    // 替换实时计算结果分组；传入空 map 时移除该分组
+    void setCalculatorItems(const MatchedItemMap &items);
+
 public slots:
     void onSelectNextItem();
     void onSelectPreviousItem();

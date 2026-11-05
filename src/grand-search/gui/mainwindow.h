@@ -37,6 +37,8 @@ private slots:
     void onResetExhitionWidget(const QString &missionId);
     // 搜索任务改变
     void onMissionChanged(const QString &missionId, const QString &missionContent);
+    // 搜索文本改变，实时计算输入框中的数学表达式
+    void onSearchTextChanged(const QString &txt);
 
 private:
     void initUI();
