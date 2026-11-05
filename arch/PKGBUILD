@@ -1,6 +1,6 @@
 # Maintainer: CharOfString <root@charofstring.cc>
 pkgname=dde-grand-search-git
-pkgver=6.0.39gxde3
+pkgver=6.0.39gxde4
 pkgrel=1
 pkgdesc='System-wide desktop search for GXDE'
 arch=('x86_64' 'aarch64')
