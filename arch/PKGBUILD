@@ -1,19 +1,20 @@
 # Maintainer: CharOfString <root@charofstring.cc>
-pkgname=dde-grand-search-git
+pkgname=dde-grand-search
 pkgver=6.0.39gxde4
 pkgrel=1
 pkgdesc='System-wide desktop search for GXDE'
 arch=('x86_64' 'aarch64')
 url="https://github.com/GXDE-OS/dde-grand-search"
 license=('GPL-3.0-or-later')
-depends=('util-dfm-git' 'deepin-pdfium-git' 'deepin-service-manager-git' 'dtk6core-git' 'dtk6gui-git'
-         'dtk6widget-git' 'dtk6declarative-git' 'qt6-base' 'qt6-declarative' 'qt6-5compat'
+depends=('util-dfm' 'gxde-deepin-pdfium' 'gxde-deepin-service-manager' 'gxde-dtk6core' 'gxde-dtk6gui'
+         'gxde-dtk6widget' 'gxde-dtk6declarative' 'qt6-base' 'qt6-declarative' 'qt6-5compat'
          'gsettings-qt5' 'layer-shell-qt' 'wayland' 'glib2' 'taglib' 'ffmpeg' 'ffmpegthumbnailer'
          'icu' 'libjpeg-turbo' 'lucene++' 'dconf' 'libgcc' 'libstdc++' 'glibc')
-optdepends=('gxde-dock-git: dock plugin')
-makedepends=('git' 'cmake' 'ninja' 'qt6-tools' 'boost' 'gxde-dock-git' 'gxde-desktop-base-git')
-provides=('dde-grand-search' 'deepin-grand-search')
-conflicts=('dde-grand-search' 'deepin-grand-search')
+optdepends=('gxde-dock: dock plugin')
+makedepends=('git' 'cmake' 'ninja' 'qt6-tools' 'boost' 'gxde-dock' 'gxde-desktop-base')
+provides=('deepin-grand-search' "dde-grand-search-git=$pkgver")
+conflicts=('deepin-grand-search' 'dde-grand-search-git')
+replaces=('dde-grand-search-git')
 source=()
 sha512sums=()
 
